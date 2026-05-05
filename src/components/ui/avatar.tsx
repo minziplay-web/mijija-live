@@ -11,6 +11,27 @@ const sizeClasses: Record<Size, string> = {
   xl: "size-20 text-xl",
 };
 
+const INITIAL_PALETTE = [
+  "#F39A2B", // daily orange
+  "#C45FA0", // antworten magenta
+  "#E5594F", // archiv coral
+  "#4A5699", // profil blue
+  "#F0D043", // accent yellow
+  "#6277BA", // brand light
+] as const;
+
+function pickInitialColor(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i += 1) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return INITIAL_PALETTE[h % INITIAL_PALETTE.length];
+}
+
+function hasRealPhoto(photoURL: string | null | undefined): photoURL is string {
+  if (!photoURL) return false;
+  if (photoURL === DEFAULT_PROFILE_PHOTO_URL) return false;
+  return photoURL.trim().length > 0;
+}
+
 export function AvatarCircle({
   member,
   size = "md",
@@ -22,23 +43,37 @@ export function AvatarCircle({
   tone?: "dark" | "light";
   className?: string;
 }) {
-  const photoURL = member.photoURL || DEFAULT_PROFILE_PHOTO_URL;
-  const palette =
-    tone === "dark"
-      ? "bg-sand-900 text-cream"
-      : "bg-white/20 text-cream ring-2 ring-white/40";
+  const realPhoto = hasRealPhoto(member.photoURL);
+
+  if (realPhoto) {
+    return (
+      <div
+        className={`flex items-center justify-center overflow-hidden rounded-full ${sizeClasses[size]} ${className}`}
+        aria-label={member.displayName || "Friend"}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={member.photoURL ?? DEFAULT_PROFILE_PHOTO_URL}
+          alt={member.displayName || "Friend"}
+          className="size-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  const initial = (member.displayName || "?").trim().slice(0, 1).toUpperCase();
+  const seed = member.userId || member.displayName || "?";
+  const bg = pickInitialColor(seed);
+  const ringClass =
+    tone === "light" ? "ring-2 ring-white/40" : "";
 
   return (
     <div
-      className={`flex items-center justify-center rounded-full font-semibold ${sizeClasses[size]} ${palette} ${className}`}
+      className={`flex items-center justify-center rounded-full font-semibold leading-none text-white ${sizeClasses[size]} ${ringClass} ${className}`}
+      style={{ backgroundColor: bg }}
       aria-label={member.displayName || "Friend"}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={photoURL}
-        alt={member.displayName || "Friend"}
-        className="size-full rounded-full object-cover"
-      />
+      {initial}
     </div>
   );
 }

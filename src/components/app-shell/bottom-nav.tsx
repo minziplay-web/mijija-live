@@ -1,107 +1,205 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const items = [
+import { AvatarCircle } from "@/components/ui/avatar";
+import { useAuth } from "@/lib/auth/auth-context";
+
+type Tab = {
+  href: string;
+  label: string;
+  color: string;
+  match: (pathname: string) => boolean;
+  Icon: (props: { active: boolean; tone: "active" | "idle" }) => React.ReactNode;
+};
+
+const TABS: Tab[] = [
   {
     href: "/",
-    label: "Home",
-    icon: HomeIcon,
-    activeClass: "border-brand-primary/45 bg-brand-soft text-brand-primary",
-    idleClass: "border-brand-primary/16 bg-white text-sand-600",
+    label: "Daily",
+    color: "#F39A2B",
+    match: (p) => p === "/",
+    Icon: HomeIcon,
   },
   {
     href: "/daily",
-    label: "Daily",
-    iconSrc: "/home-icons/daily.svg",
-    activeClass: "border-daily-primary/45 bg-daily-soft text-daily-text",
-    idleClass: "border-daily-primary/16 bg-white text-sand-600",
-  },
-  {
-    href: "/resolved",
-    label: "Recap",
-    iconSrc: "/home-icons/resolved.svg",
-    activeClass: "border-recap-primary/45 bg-recap-soft text-recap-text",
-    idleClass: "border-recap-primary/16 bg-white text-sand-600",
+    label: "Antworten",
+    color: "#C45FA0",
+    match: (p) => p === "/daily" || p.startsWith("/daily/"),
+    Icon: PencilIcon,
   },
   {
     href: "/past-dailies",
     label: "Archiv",
-    iconSrc: "/home-icons/past.svg",
-    activeClass: "border-archive-primary/45 bg-archive-soft text-archive-text",
-    idleClass: "border-archive-primary/16 bg-white text-sand-600",
+    color: "#E5594F",
+    match: (p) => p.startsWith("/past-dailies"),
+    Icon: ArchiveIcon,
   },
-] as const;
+  // Profil-Tab is rendered separately because the icon = current user's avatar
+];
 
-function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
+const PROFIL: Omit<Tab, "Icon"> = {
+  href: "/profile",
+  label: "Profil",
+  color: "#4A5699",
+  match: (p) => p.startsWith("/profile"),
+};
+
+const IDLE = "#64768D"; // sand-500
 
 export function BottomNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
+  const { authState } = useAuth();
+  const profile = authState.status === "authenticated" ? authState.user : null;
 
   return (
     <nav
-      className="safe-area-bottom fixed inset-x-0 bottom-0 z-30 border-t border-sand-200/80 bg-white/92 shadow-[0_-18px_42px_-32px_rgba(23,32,49,0.38)] backdrop-blur-xl"
+      className="safe-area-bottom fixed inset-x-0 bottom-0 z-30 border-t border-sand-200 bg-white"
       aria-label="Hauptnavigation"
     >
-      <ul className="mx-auto grid max-w-screen-sm grid-cols-4 gap-1.5 px-3 py-2">
-        {items.map((item) => {
-          const active = isActive(pathname, item.href);
+      <ul className="mx-auto grid max-w-screen-sm grid-cols-4">
+        {TABS.map((tab) => {
+          const active = tab.match(pathname);
+          const color = active ? tab.color : IDLE;
           return (
-            <li key={item.href}>
+            <li key={tab.href}>
               <Link
-                href={item.href}
+                href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-[1rem] border px-1 py-1 text-[10px] font-black uppercase tracking-[0.06em] shadow-card-flat transition active:scale-[0.97] ${
-                  active ? item.activeClass : item.idleClass
-                }`}
+                className="flex w-full flex-col items-center justify-center gap-1.5 py-3"
+                style={{ color }}
               >
+                <tab.Icon active={active} tone={active ? "active" : "idle"} />
                 <span
-                  className={`relative flex size-6 items-center justify-center rounded-lg ${
-                    active ? "bg-white/72" : "bg-sand-50"
-                  }`}
+                  className="text-[10px] uppercase tracking-[0.16em]"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    color,
+                    fontWeight: active ? 600 : 500,
+                  }}
                 >
-                  {"iconSrc" in item ? (
-                    <Image
-                      src={item.iconSrc}
-                      alt=""
-                      fill
-                      sizes="24px"
-                      className="object-contain p-1"
-                      aria-hidden
-                    />
-                  ) : (
-                    <item.icon className="size-4.5" active={active} />
-                  )}
+                  {tab.label}
                 </span>
-                <span className="leading-none">{item.label}</span>
               </Link>
             </li>
           );
         })}
+
+        {/* Profil-Tab — Icon = Avatar of current user */}
+        <li>
+          <Link
+            href={PROFIL.href}
+            aria-current={PROFIL.match(pathname) ? "page" : undefined}
+            className="flex w-full flex-col items-center justify-center gap-1.5 py-3"
+          >
+            <ProfilTabIcon
+              active={PROFIL.match(pathname)}
+              activeColor={PROFIL.color}
+              displayName={profile?.displayName ?? "Du"}
+              userId={profile?.userId ?? "anon"}
+              photoURL={profile?.photoURL ?? null}
+            />
+            <span
+              className="text-[10px] uppercase tracking-[0.16em]"
+              style={{
+                fontFamily: "var(--font-mono)",
+                color: PROFIL.match(pathname) ? PROFIL.color : IDLE,
+                fontWeight: PROFIL.match(pathname) ? 600 : 500,
+              }}
+            >
+              {PROFIL.label}
+            </span>
+          </Link>
+        </li>
       </ul>
     </nav>
   );
 }
 
-function HomeIcon({ className, active }: { className?: string; active: boolean }) {
+function ProfilTabIcon({
+  active,
+  activeColor,
+  displayName,
+  userId,
+  photoURL,
+}: {
+  active: boolean;
+  activeColor: string;
+  displayName: string;
+  userId: string;
+  photoURL: string | null;
+}) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={active ? 2.5 : 2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
+    <span
+      className="flex size-6 items-center justify-center rounded-full"
+      style={{
+        boxShadow: active ? `0 0 0 2px ${activeColor}` : "none",
+      }}
     >
-      <path d="M3.5 11.4 12 4.5l8.5 6.9" />
-      <path d="M6 10.5V19a1 1 0 0 0 1 1h3.2v-5.4h3.6V20H17a1 1 0 0 0 1-1v-8.5" />
+      <AvatarCircle
+        member={{ userId, displayName, photoURL }}
+        size="xs"
+        className="size-6 text-[10px]"
+      />
+    </span>
+  );
+}
+
+function HomeIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width={24} height={24} aria-hidden>
+      <path
+        d="M3.5 11.4 12 4.5l8.5 6.9V19a1 1 0 0 1-1 1h-3.6v-5.4h-3.8V20H7.5a1 1 0 0 1-1-1v-7.6"
+        fill={active ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth={active ? 1.6 : 1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function PencilIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width={24} height={24} aria-hidden>
+      <path
+        d="M14.7 4.5 19.5 9.3 8.6 20.2H3.8v-4.8L14.7 4.5Z"
+        fill={active ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth={active ? 1.4 : 1.7}
+        strokeLinejoin="round"
+      />
+      <path d="M13 6.2 17.8 11" stroke="currentColor" strokeWidth={1.7} fill="none" />
+    </svg>
+  );
+}
+
+function ArchiveIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width={24} height={24} aria-hidden>
+      <rect
+        x="3.5"
+        y="6.5"
+        width="17"
+        height="13"
+        rx="1.6"
+        fill={active ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth={1.7}
+      />
+      <path
+        d="M3.5 10h17"
+        stroke={active ? "white" : "currentColor"}
+        strokeWidth={1.4}
+      />
+      <path
+        d="M9.5 13.5h5"
+        stroke={active ? "white" : "currentColor"}
+        strokeWidth={1.7}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
