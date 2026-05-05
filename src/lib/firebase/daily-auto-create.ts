@@ -39,28 +39,24 @@ export async function maybeAutoCreateDailyRun(
     };
   }
 
-  const timezone = config.timezone ?? "Europe/Berlin";
-  const berlinHour = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: timezone,
-      hour: "2-digit",
-      hour12: false,
-    }).format(now),
-  );
+  const dateKey = berlinDateKey(now);
 
-  if (options?.force !== true && berlinHour !== 0) {
+  if (options?.force !== true && config.lastAutoCreatedDateKey === dateKey) {
     return {
       status: "skipped" as const,
-      reason: "outside_window",
-      message: `Noch nicht Mitternacht in ${timezone}.`,
+      reason: "already_processed_today",
+      dateKey,
+      message: `Auto-Daily für ${dateKey} wurde bereits ausgeführt.`,
     };
   }
 
-  const dateKey = berlinDateKey(now);
   const runRef = db.collection("dailyRuns").doc(dateKey);
   const existingRun = await runRef.get();
 
   if (existingRun.exists) {
+    if (options?.force !== true) {
+      await configRef.set({ lastAutoCreatedDateKey: dateKey }, { merge: true });
+    }
     return {
       status: "skipped" as const,
       reason: "already_exists",
@@ -144,6 +140,10 @@ export async function maybeAutoCreateDailyRun(
       );
     }
     await batch.commit();
+  }
+
+  if (options?.force !== true) {
+    await configRef.set({ lastAutoCreatedDateKey: dateKey }, { merge: true });
   }
 
   return {

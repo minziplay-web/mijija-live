@@ -227,6 +227,7 @@ export interface AppConfigDoc {
   dailyAutoCreateEnabled?: boolean;
   dailyIncludedCategories?: Category[];
   dailyForcedCategories?: Category[];
+  lastAutoCreatedDateKey?: string;
   liveDefaultQuestionDurationSec: number;
   liveDefaultRevealDurationSec: number;
   updatedAt?: unknown;
