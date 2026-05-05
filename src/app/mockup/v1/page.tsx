@@ -294,41 +294,16 @@ function StorySlide() {
         border: `1px solid ${C.hair}`,
       }}
     >
-      {/* progress bars */}
-      <div className="absolute inset-x-0 top-0 z-10 flex gap-1 px-4 pt-3">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const filled = i < 2;
-          const half = i === 2;
-          return (
-            <span
-              key={i}
-              className="h-[2px] flex-1 overflow-hidden rounded-full"
-              style={{ backgroundColor: filled ? C.white : "#FFFFFF26" }}
-            >
-              {half ? (
-                <span
-                  className="block h-full"
-                  style={{ width: "60%", backgroundColor: C.white }}
-                />
-              ) : null}
-            </span>
-          );
-        })}
-      </div>
-
-      {/* top chrome */}
-      <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 pt-6">
-        <button aria-label="Schließen" style={{ color: C.white }}>
-          <CloseIcon />
-        </button>
-        <Mono size={11} color={C.textMuted}>
+      {/* top header — just position + category, no story-chrome */}
+      <div className="absolute inset-x-5 top-4 z-10 flex items-center justify-between">
+        <CategoryEyebrow label="Charakter" color={C.daily} />
+        <Mono size={11} color={C.textDim}>
           03 / 05
         </Mono>
       </div>
 
       {/* content stack */}
-      <div className="absolute inset-x-5 top-[60px] flex flex-col gap-5">
-        <CategoryEyebrow label="Charakter" color={C.daily} />
+      <div className="absolute inset-x-5 top-[44px] flex flex-col gap-5">
 
         {/* question — kept small + clean */}
         <h3
@@ -345,8 +320,8 @@ function StorySlide() {
           </Mono>
         </div>
 
-        {/* horizontal bar chart — Insta-vote style */}
-        <div className="flex flex-col gap-3">
+        {/* Each option as a self-contained block: bar + voters together */}
+        <div className="flex flex-col gap-5">
           {/* Winner */}
           <div>
             <div className="mb-1.5 flex items-baseline justify-between">
@@ -360,7 +335,7 @@ function StorySlide() {
                 </span>
               </span>
               <Mono size={13} color={C.daily} weight={500}>
-                {winnerCount}/{totalVoters}
+                {Math.round(winnerPct)}%
               </Mono>
             </div>
             <div
@@ -371,6 +346,23 @@ function StorySlide() {
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{ width: `${winnerPct}%`, backgroundColor: C.daily }}
               />
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {winnerVoters.map((v) => (
+                <span
+                  key={v}
+                  className="inline-flex items-center gap-1.5 rounded-full px-2 py-1"
+                  style={{ backgroundColor: C.bgElev }}
+                >
+                  <Avatar name={v} size={16} />
+                  <span
+                    className="text-[12px]"
+                    style={{ color: C.white, fontWeight: 500 }}
+                  >
+                    {v}
+                  </span>
+                </span>
+              ))}
             </div>
           </div>
 
@@ -387,7 +379,7 @@ function StorySlide() {
                 </span>
               </span>
               <Mono size={13} color={C.textMuted} weight={500}>
-                {runnerUpCount}/{totalVoters}
+                {Math.round(runnerUpPct)}%
               </Mono>
             </div>
             <div
@@ -399,65 +391,23 @@ function StorySlide() {
                 style={{ width: `${runnerUpPct}%`, backgroundColor: C.textDim }}
               />
             </div>
-          </div>
-        </div>
-
-        {/* Voter detail — flat list */}
-        <div className="flex flex-col gap-2 pt-2">
-          <div className="flex items-center gap-2">
-            <Mono size={10} color={C.textDim}>
-              FÜR {winnerName.toUpperCase()}
-            </Mono>
-            <span
-              aria-hidden
-              className="block h-px flex-1"
-              style={{ backgroundColor: C.hair }}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {winnerVoters.map((v) => (
-              <span
-                key={v}
-                className="inline-flex items-center gap-1.5 rounded-full px-2 py-1"
-                style={{ backgroundColor: C.bgElev }}
-              >
-                <Avatar name={v} size={16} />
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {runnerUpVoters.map((v) => (
                 <span
-                  className="text-[12px]"
-                  style={{ color: C.white, fontWeight: 500 }}
+                  key={v}
+                  className="inline-flex items-center gap-1.5 rounded-full px-2 py-1"
+                  style={{ backgroundColor: C.bgElev }}
                 >
-                  {v}
+                  <Avatar name={v} size={16} />
+                  <span
+                    className="text-[12px]"
+                    style={{ color: C.white, fontWeight: 500 }}
+                  >
+                    {v}
+                  </span>
                 </span>
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-2 flex items-center gap-2">
-            <Mono size={10} color={C.textDim}>
-              FÜR {runnerUpName.toUpperCase()}
-            </Mono>
-            <span
-              aria-hidden
-              className="block h-px flex-1"
-              style={{ backgroundColor: C.hair }}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {runnerUpVoters.map((v) => (
-              <span
-                key={v}
-                className="inline-flex items-center gap-1.5 rounded-full px-2 py-1"
-                style={{ backgroundColor: C.bgElev }}
-              >
-                <Avatar name={v} size={16} />
-                <span
-                  className="text-[12px]"
-                  style={{ color: C.white, fontWeight: 500 }}
-                >
-                  {v}
-                </span>
-              </span>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
