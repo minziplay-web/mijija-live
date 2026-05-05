@@ -45,6 +45,7 @@ import {
   userStatsDoc,
   usersCollection,
 } from "@/lib/firebase/collections";
+import { withAdminLog } from "@/lib/firebase/admin-log";
 import { berlinDateKey, shiftDateKey } from "@/lib/mapping/date";
 import { assertValidDailyRunPayload } from "@/lib/mapping/payload-guards";
 import type {
@@ -165,61 +166,63 @@ export async function updateQuestion(
   questionId: string,
   input: AdminQuestionEditInput,
 ) {
-  const questionsRef = questionsCollection();
-  const runsRef = dailyRunsCollection();
+  return withAdminLog("updateQuestion", { questionId }, async () => {
+    const questionsRef = questionsCollection();
+    const runsRef = dailyRunsCollection();
 
-  if (!questionsRef) {
-    throw new Error("Firestore ist nicht verfügbar.");
-  }
+    if (!questionsRef) {
+      throw new Error("Firestore ist nicht verfügbar.");
+    }
 
-  const questionRef = doc(questionsRef, questionId);
-  const payload = normalizeQuestionEditInput(input);
+    const questionRef = doc(questionsRef, questionId);
+    const payload = normalizeQuestionEditInput(input);
 
-  await updateDoc(questionRef, {
-    ...payload,
-    updatedAt: serverTimestamp(),
-  });
-
-  if (!runsRef) {
-    return;
-  }
-
-  const updatedSnap = await getDoc(questionRef);
-  if (!updatedSnap.exists()) {
-    return;
-  }
-  const updated = updatedSnap.data() as QuestionDoc;
-  const todayKey = berlinDateKey();
-
-  const runsSnap = await getDocs(
-    query(runsRef, where("questionIds", "array-contains", questionId)),
-  );
-
-  for (const runDoc of runsSnap.docs) {
-    const run = runDoc.data() as DailyRunDoc;
-    if (run.dateKey < todayKey) continue;
-    if (!run.items) continue;
-
-    let changed = false;
-    const nextItems = run.items.map((item) => {
-      if (item.questionId !== questionId) return item;
-      changed = true;
-      const snapshot = {
-        text: updated.text,
-        category: updated.category,
-        ...(updated.options ? { options: updated.options } : {}),
-        ...(updated.imagePath ? { imagePath: updated.imagePath } : {}),
-      };
-      return { ...item, type: updated.type, questionSnapshot: snapshot };
+    await updateDoc(questionRef, {
+      ...payload,
+      updatedAt: serverTimestamp(),
     });
 
-    if (changed) {
-      await updateDoc(runDoc.ref, {
-        items: nextItems,
-        updatedAt: serverTimestamp(),
-      });
+    if (!runsRef) {
+      return;
     }
-  }
+
+    const updatedSnap = await getDoc(questionRef);
+    if (!updatedSnap.exists()) {
+      return;
+    }
+    const updated = updatedSnap.data() as QuestionDoc;
+    const todayKey = berlinDateKey();
+
+    const runsSnap = await getDocs(
+      query(runsRef, where("questionIds", "array-contains", questionId)),
+    );
+
+    for (const runDoc of runsSnap.docs) {
+      const run = runDoc.data() as DailyRunDoc;
+      if (run.dateKey < todayKey) continue;
+      if (!run.items) continue;
+
+      let changed = false;
+      const nextItems = run.items.map((item) => {
+        if (item.questionId !== questionId) return item;
+        changed = true;
+        const snapshot = {
+          text: updated.text,
+          category: updated.category,
+          ...(updated.options ? { options: updated.options } : {}),
+          ...(updated.imagePath ? { imagePath: updated.imagePath } : {}),
+        };
+        return { ...item, type: updated.type, questionSnapshot: snapshot };
+      });
+
+      if (changed) {
+        await updateDoc(runDoc.ref, {
+          items: nextItems,
+          updatedAt: serverTimestamp(),
+        });
+      }
+    }
+  });
 }
 
 export async function createQuestion(
@@ -939,6 +942,10 @@ export async function rerollDailyRunQuestion(params: {
   runId?: string;
   questionId: string;
 }): Promise<AdminDailyQuestionRerollResult> {
+  return withAdminLog(
+    "rerollDailyRunQuestion",
+    { dateKey: params.dateKey, runId: params.runId, questionId: params.questionId },
+    async () => {
   const { dateKey, questionId } = params;
   const runId = params.runId ?? dateKey;
   const runRef = dailyRunDoc(runId);
@@ -1080,6 +1087,8 @@ export async function rerollDailyRunQuestion(params: {
     deletedFirstAnswerLocks: deletionResult.counts.deletedFirstAnswerLocks,
     deletedMemeVotes: deletionResult.counts.deletedMemeVotes,
   };
+    },
+  );
 }
 
 export async function removeDailyRunQuestion(params: {
@@ -1087,6 +1096,10 @@ export async function removeDailyRunQuestion(params: {
   runId?: string;
   questionId: string;
 }): Promise<AdminDailyQuestionRemoveResult> {
+  return withAdminLog(
+    "removeDailyRunQuestion",
+    { dateKey: params.dateKey, runId: params.runId, questionId: params.questionId },
+    async () => {
   const { dateKey, questionId } = params;
   const runId = params.runId ?? dateKey;
   const runRef = dailyRunDoc(runId);
@@ -1194,6 +1207,8 @@ export async function removeDailyRunQuestion(params: {
     deletedFirstAnswerLocks: deletionResult.counts.deletedFirstAnswerLocks,
     deletedMemeVotes: deletionResult.counts.deletedMemeVotes,
   };
+    },
+  );
 }
 
 export async function addSpecificQuestionToDailyRun(params: {
@@ -1201,6 +1216,10 @@ export async function addSpecificQuestionToDailyRun(params: {
   runId?: string;
   questionId: string;
 }): Promise<AdminDailyQuestionAddResult> {
+  return withAdminLog(
+    "addSpecificQuestionToDailyRun",
+    { dateKey: params.dateKey, runId: params.runId, questionId: params.questionId },
+    async () => {
   const { dateKey, questionId } = params;
   const runId = params.runId ?? dateKey;
   const runRef = dailyRunDoc(runId);
@@ -1279,6 +1298,8 @@ export async function addSpecificQuestionToDailyRun(params: {
     questionText: question.text,
     questionCount: nextItems.length,
   };
+    },
+  );
 }
 
 export async function cleanupFinishedLiveSessions(params?: {

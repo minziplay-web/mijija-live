@@ -138,3 +138,8 @@ export function appConfigDoc() {
   const { db } = getFirebaseServices();
   return db ? doc(db, "appConfig", "main") : null;
 }
+
+export function adminErrorLogsCollection() {
+  const { db } = getFirebaseServices();
+  return db ? collection(db, "adminErrorLogs") : null;
+}

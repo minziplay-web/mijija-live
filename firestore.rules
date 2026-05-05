@@ -606,17 +606,15 @@ service cloud.firestore {
 
     match /questions/{questionId} {
       allow read: if isActiveMember();
-      allow create: if isAdmin()
-        && hasValidQuestionPayload(request.resource.data);
-      allow update: if (isAdmin() && hasValidQuestionPayload(request.resource.data))
+      allow create: if isAdmin();
+      allow update: if isAdmin()
         || isAllowedQuestionDailyLockUpdate(questionId);
       allow delete: if isAdmin();
     }
 
     match /dailyRuns/{runId} {
       allow read: if isActiveMember();
-      allow create, update: if isAdmin()
-        && hasValidDailyRunPayload(request.resource.data, runId);
+      allow create, update: if isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -812,8 +810,14 @@ service cloud.firestore {
 
     match /appConfig/{configId} {
       allow read: if isActiveMember();
-      allow create, update: if isAdmin()
-        && hasValidAppConfigPayload(request.resource.data);
+      allow create, update: if isAdmin();
+    }
+
+    match /adminErrorLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if false;
+      allow delete: if isAdmin();
     }
   }
 }
