@@ -81,6 +81,8 @@ export function AdminDailyList({
   const [todayOpen, setTodayOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addStep, setAddStep] = useState<"choose" | "preview">("choose");
+  const [addMode, setAddMode] = useState<"random" | "manual" | null>(null);
+  const [addRandomScope, setAddRandomScope] = useState<"all" | "category">("all");
   const [addCategory, setAddCategory] = useState<Category | "all">("all");
   const [addSelected, setAddSelected] = useState<AdminQuestionRow | null>(null);
   const [addPickedVia, setAddPickedVia] = useState<"random" | "category" | null>(null);
@@ -179,6 +181,8 @@ export function AdminDailyList({
   const openAddModal = () => {
     setAddModalOpen(true);
     setAddStep("choose");
+    setAddMode(null);
+    setAddRandomScope("all");
     setAddSelected(null);
     setAddPickedVia(null);
     setAddCategory("all");
@@ -189,25 +193,36 @@ export function AdminDailyList({
   const closeAddModal = () => {
     setAddModalOpen(false);
     setAddStep("choose");
+    setAddMode(null);
+    setAddRandomScope("all");
     setAddSelected(null);
     setAddPickedVia(null);
     setAddStatus("idle");
     setAddMessage(undefined);
   };
 
-  const pickRandom = () => {
-    if (eligiblePool.length === 0) {
+  const pickRandom = (scope: "all" | "category" = addRandomScope) => {
+    const basePool =
+      scope === "category"
+        ? eligiblePool.filter((row) => row.category === addCategory)
+        : eligiblePool;
+    if (basePool.length === 0) {
       setAddStatus("error");
-      setAddMessage("Keine eligible Fragen im Pool.");
+      setAddMessage(
+        scope === "category"
+          ? "Keine eligible Fragen in dieser Kategorie."
+          : "Keine eligible Fragen im Pool.",
+      );
       return;
     }
-    const pool =
-      addSelected && eligiblePool.length > 1
-        ? eligiblePool.filter((row) => row.questionId !== addSelected.questionId)
-        : eligiblePool;
-    const random = pool[Math.floor(Math.random() * pool.length)];
+    const candidates =
+      addSelected && basePool.length > 1
+        ? basePool.filter((row) => row.questionId !== addSelected.questionId)
+        : basePool;
+    const random = candidates[Math.floor(Math.random() * candidates.length)];
     setAddSelected(random);
     setAddPickedVia("random");
+    setAddRandomScope(scope);
     setAddStep("preview");
     setAddStatus("idle");
     setAddMessage(undefined);
@@ -496,16 +511,95 @@ export function AdminDailyList({
 
             <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
               {addStep === "choose" ? (
-                <>
-                  <Button
-                    className="w-full rounded-xl"
-                    variant="secondary"
-                    onClick={pickRandom}
-                    disabled={eligiblePool.length === 0}
-                  >
-                    🎲 Würfeln (zufällig aus Pool)
-                  </Button>
+                addMode === null ? (
+                  <div className="space-y-2">
+                    <Button
+                      className="w-full rounded-xl"
+                      variant="secondary"
+                      onClick={() => {
+                        setAddMode("random");
+                        setAddRandomScope("all");
+                        setAddCategory("all");
+                      }}
+                      disabled={eligiblePool.length === 0}
+                    >
+                      🎲 Würfeln
+                    </Button>
+                    <Button
+                      className="w-full rounded-xl"
+                      variant="secondary"
+                      onClick={() => {
+                        setAddMode("manual");
+                        setAddCategory("all");
+                      }}
+                      disabled={eligiblePool.length === 0}
+                    >
+                      📋 Aus Liste wählen
+                    </Button>
+                  </div>
+                ) : addMode === "random" ? (
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <span className="text-xs font-bold uppercase tracking-[0.18em] text-sand-500">
+                        Pool für den Wurf
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant={addRandomScope === "all" ? "primary" : "ghost"}
+                          onClick={() => {
+                            setAddRandomScope("all");
+                            setAddCategory("all");
+                          }}
+                        >
+                          Alle Kategorien
+                        </Button>
+                        <Button
+                          variant={addRandomScope === "category" ? "primary" : "ghost"}
+                          onClick={() => setAddRandomScope("category")}
+                        >
+                          Einzelne Kategorie
+                        </Button>
+                      </div>
+                    </div>
 
+                    {addRandomScope === "category" ? (
+                      <label className="space-y-1.5">
+                        <span className="text-xs font-bold uppercase tracking-[0.18em] text-sand-500">
+                          Kategorie
+                        </span>
+                        <select
+                          value={addCategory === "all" ? "" : addCategory}
+                          onChange={(event) =>
+                            setAddCategory(event.target.value as Category)
+                          }
+                          className="w-full rounded-2xl border border-sand-200 bg-white px-3 py-2 text-sm font-semibold text-sand-900 outline-none transition focus:border-admin-primary focus:ring-2 focus:ring-admin-primary/20"
+                        >
+                          <option value="" disabled>
+                            Bitte wählen…
+                          </option>
+                          {(Object.keys(CATEGORY_LABELS) as Category[]).map((category) => (
+                            <option key={category} value={category}>
+                              {CATEGORY_LABELS[category]}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : null}
+
+                    <Button
+                      className="w-full rounded-xl"
+                      variant="primary"
+                      onClick={() => pickRandom(addRandomScope)}
+                      disabled={
+                        eligiblePool.length === 0 ||
+                        (addRandomScope === "category" &&
+                          (addCategory === "all" || filteredPool.length === 0))
+                      }
+                    >
+                      🎲 Würfeln
+                    </Button>
+                  </div>
+                ) : (
                   <div className="space-y-2">
                     <label className="space-y-1.5">
                       <span className="text-xs font-bold uppercase tracking-[0.18em] text-sand-500">
@@ -553,7 +647,7 @@ export function AdminDailyList({
                       </ul>
                     )}
                   </div>
-                </>
+                )
               ) : addSelected ? (
                 <div className="space-y-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sand-500">
@@ -620,10 +714,20 @@ export function AdminDailyList({
                   {addPickedVia === "random" ? (
                     <Button
                       variant="ghost"
-                      onClick={pickRandom}
-                      disabled={addStatus === "saving" || eligiblePool.length <= 1}
+                      onClick={() => pickRandom(addRandomScope)}
+                      disabled={
+                        addStatus === "saving" ||
+                        (addRandomScope === "category"
+                          ? eligiblePool.filter((row) => row.category === addCategory)
+                              .length <= 1
+                          : eligiblePool.length <= 1)
+                      }
                     >
-                      🎲 Erneut würfeln
+                      {addRandomScope === "category"
+                        ? `🎲 Erneut würfeln (${
+                            addCategory !== "all" ? CATEGORY_LABELS[addCategory] : ""
+                          })`
+                        : "🎲 Erneut würfeln"}
                     </Button>
                   ) : null}
                   <Button
@@ -632,6 +736,24 @@ export function AdminDailyList({
                     disabled={addStatus === "saving"}
                   >
                     {addStatus === "saving" ? "Pushe..." : "Ins Daily pushen"}
+                  </Button>
+                </>
+              ) : addMode !== null ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setAddMode(null);
+                      setAddRandomScope("all");
+                      setAddCategory("all");
+                      setAddStatus("idle");
+                      setAddMessage(undefined);
+                    }}
+                  >
+                    Zurück
+                  </Button>
+                  <Button variant="ghost" onClick={closeAddModal}>
+                    Abbrechen
                   </Button>
                 </>
               ) : (
