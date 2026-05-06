@@ -1,6 +1,7 @@
 "use client";
 
 import { onSnapshot, query, where } from "firebase/firestore";
+import { motion, useDragControls, type PanInfo } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -100,6 +101,7 @@ function NotificationPanel({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const dragControls = useDragControls();
 
   useEffect(() => {
     if (state.status !== "ready") {
@@ -113,6 +115,11 @@ function NotificationPanel({
     onClose();
     router.push("/daily");
   };
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.y > 90 || info.velocity.y > 620) {
+      onClose();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-label="Tageslog">
@@ -124,12 +131,28 @@ function NotificationPanel({
         onClick={onClose}
       />
 
-      <section
+      <motion.section
         className="absolute inset-x-0 bottom-0 max-h-[82dvh] overflow-hidden rounded-t-2xl border-t shadow-[0_-18px_54px_-30px_rgba(0,0,0,0.8)] sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-12 sm:w-[360px] sm:max-w-[calc(100vw-24px)] sm:rounded-2xl sm:border sm:shadow-[0_20px_70px_-38px_rgba(0,0,0,0.9)]"
         style={{ backgroundColor: DARK.elevated, borderColor: DARK.hairStrong }}
+        initial={{ y: 36, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 360, damping: 34, mass: 0.8 }}
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.22 }}
+        onDragEnd={handleDragEnd}
       >
-        <header className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: DARK.hair }}>
+        <header
+          className="flex cursor-grab touch-none items-center justify-between border-b px-4 py-3 active:cursor-grabbing"
+          style={{ borderColor: DARK.hair }}
+          onPointerDown={(event) => dragControls.start(event)}
+        >
           <div>
+            <div className="mb-2 flex justify-center sm:hidden">
+              <span className="h-0.5 w-8 rounded-full" style={{ backgroundColor: DARK.hairStrong }} />
+            </div>
             <p
               className="text-[10px] font-semibold uppercase tracking-[0.18em]"
               style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
@@ -143,6 +166,7 @@ function NotificationPanel({
             className="flex size-8 items-center justify-center rounded-full transition"
             style={{ color: DARK.muted }}
             aria-label="Tageslog schließen"
+            onPointerDown={(event) => event.stopPropagation()}
             onClick={onClose}
           >
             <CloseIcon />
@@ -219,7 +243,7 @@ function NotificationPanel({
             </ol>
           ) : null}
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

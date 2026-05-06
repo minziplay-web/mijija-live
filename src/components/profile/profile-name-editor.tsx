@@ -74,6 +74,11 @@ export function ProfileNameEditor({ user }: { user: AppUser }) {
           maxLength={24}
           error={nameError}
           className="border-[#2C2C2E] bg-[#161616] text-[#FAFAFA] placeholder:text-[#6E6E73] focus:border-[#D860B5] focus:ring-[#D860B5]/25"
+          style={{
+            backgroundColor: "#161616",
+            borderColor: "#2C2C2E",
+            color: "#FAFAFA",
+          }}
         />
         {status === "error" && error ? <ErrorBanner message={error} /> : null}
         <div className="flex gap-3">

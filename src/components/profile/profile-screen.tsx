@@ -76,6 +76,8 @@ export function ProfileScreen({ state }: { state: ProfileViewState }) {
               const next = !prev;
               if (!next) {
                 setActiveEditor(null);
+              } else {
+                setActiveEditor("name");
               }
               return next;
             });
@@ -86,6 +88,32 @@ export function ProfileScreen({ state }: { state: ProfileViewState }) {
       ) : (
         <ProfileHeader user={state.user} isSelf={state.isSelf} />
       )}
+      {state.isSelf && isEditing ? (
+        <div className="grid grid-cols-2 gap-2 rounded-2xl border border-[#2C2C2E] bg-[#161616] p-1">
+          <button
+            type="button"
+            className="min-h-10 rounded-xl text-sm font-semibold transition"
+            style={{
+              backgroundColor: activeEditor === "name" ? PROFILE_ACCENT : "transparent",
+              color: activeEditor === "name" ? "#FFFFFF" : "#A8A8A8",
+            }}
+            onClick={() => setActiveEditor("name")}
+          >
+            Name
+          </button>
+          <button
+            type="button"
+            className="min-h-10 rounded-xl text-sm font-semibold transition"
+            style={{
+              backgroundColor: activeEditor === "photo" ? PROFILE_ACCENT : "transparent",
+              color: activeEditor === "photo" ? "#FFFFFF" : "#A8A8A8",
+            }}
+            onClick={() => setActiveEditor("photo")}
+          >
+            Bild
+          </button>
+        </div>
+      ) : null}
       {state.isSelf && isEditing && activeEditor === "name" ? (
         <ProfileNameEditor key={`${state.user.userId}:${state.user.displayName}`} user={state.user} />
       ) : null}

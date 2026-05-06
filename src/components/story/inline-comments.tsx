@@ -435,14 +435,14 @@ function CommentBottomSheet({
             onDragEnd={handleDragEnd}
           >
             <header
-              className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b px-4 pb-2 pt-1"
+              className="sticky top-0 z-10 flex shrink-0 cursor-grab touch-none items-center justify-between border-b px-4 pb-2 pt-1 active:cursor-grabbing"
               style={{ borderColor: DARK.hair, backgroundColor: DARK.elevated }}
+              onPointerDown={(event) => dragControls.start(event)}
             >
               <button
                 type="button"
-                className="flex flex-1 cursor-grab touch-none justify-center py-1.5 active:cursor-grabbing"
+                className="flex flex-1 justify-center py-1.5"
                 aria-label="Kommentare nach unten ziehen zum Schließen"
-                onPointerDown={(event) => dragControls.start(event)}
               >
                 <span className="h-0.5 w-8 rounded-full" style={{ backgroundColor: DARK.hairStrong }} />
               </button>
@@ -451,13 +451,18 @@ function CommentBottomSheet({
                 className="absolute right-4 top-3 inline-flex size-8 items-center justify-center rounded-full text-xl leading-none"
                 style={{ color: DARK.muted, backgroundColor: DARK.hair }}
                 aria-label="Kommentare schließen"
+                onPointerDown={(event) => event.stopPropagation()}
                 onClick={onClose}
               >
                 ×
               </button>
             </header>
 
-            <div className="flex items-center justify-center border-b px-4 py-3" style={{ borderColor: DARK.hair }}>
+            <div
+              className="flex cursor-grab touch-none items-center justify-center border-b px-4 py-3 active:cursor-grabbing"
+              style={{ borderColor: DARK.hair }}
+              onPointerDown={(event) => dragControls.start(event)}
+            >
               <span className="text-sm font-semibold" style={{ color: DARK.text }}>
                 Kommentare
               </span>
