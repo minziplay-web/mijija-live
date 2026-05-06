@@ -1,7 +1,9 @@
 "use client";
 
 import { onSnapshot, query, where } from "firebase/firestore";
-import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion, useDragControls, type PanInfo } from "motion/react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 
 import { STORY_COLORS } from "@/components/story/constants";
 import { AvatarCircle } from "@/components/ui/avatar";
@@ -47,7 +49,7 @@ export function InlineCommentsSection({
   const [editing, setEditing] = useState<{ commentId: string; text: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [likeState, setLikeState] = useState({ count: 0, likedByMe: false });
   const [likeBusy, setLikeBusy] = useState(false);
   const resolvedRunId = runId ?? dateKey;
@@ -211,10 +213,10 @@ export function InlineCommentsSection({
         <button
           type="button"
           className="inline-flex items-center gap-1.5 text-sm font-semibold transition"
-          style={{ color: expanded ? STORY_COLORS.daily : DARK.muted }}
-          aria-expanded={expanded}
-          aria-label={expanded ? "Kommentare einklappen" : "Kommentare anzeigen"}
-          onClick={() => setExpanded((value) => !value)}
+          style={{ color: sheetOpen ? STORY_COLORS.daily : DARK.muted }}
+          aria-expanded={sheetOpen}
+          aria-label="Kommentare anzeigen"
+          onClick={() => setSheetOpen(true)}
         >
           <CommentIcon />
           <span
@@ -226,155 +228,22 @@ export function InlineCommentsSection({
         </button>
       </div>
 
-      {expanded ? (
-        <div className="space-y-3 border-t pt-4" style={{ borderColor: DARK.hair }}>
-          {error ? (
-            <p
-              className="rounded-lg px-3 py-2 text-xs text-red-200"
-              style={{ backgroundColor: "#3A1414" }}
-            >
-              {error}
-            </p>
-          ) : null}
-
-          {sortedComments.length === 0 ? (
-            <p className="text-sm" style={{ color: DARK.muted }}>
-              Noch keine Kommentare.
-            </p>
-          ) : (
-            <ul className="divide-y" style={{ borderColor: DARK.hair }}>
-              {sortedComments.map((comment) => {
-                const user = users.get(comment.userId);
-                const isOwn = currentUser?.userId === comment.userId;
-                const isEditing = editing?.commentId === comment.commentId;
-                const displayName =
-                  user?.displayName ?? (isOwn ? currentUser.displayName : "Jemand");
-
-                return (
-                  <li key={comment.commentId} className="py-3">
-                    <div className="flex gap-3">
-                      <AvatarCircle
-                        member={{
-                          userId: comment.userId,
-                          displayName,
-                          photoURL: user?.photoURL ?? null,
-                        }}
-                        size="sm"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-baseline justify-between gap-3">
-                          <span className="text-sm font-semibold" style={{ color: DARK.text }}>
-                            {displayName}
-                          </span>
-                          <span
-                            className="shrink-0 text-[10px] uppercase tracking-[0.12em]"
-                            style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
-                          >
-                            {formatCommentTime(comment.createdAt)}
-                          </span>
-                        </div>
-
-                        {isEditing ? (
-                          <div className="mt-2 space-y-2">
-                            <CommentTextarea
-                              value={editing.text}
-                              rows={3}
-                              disabled={submitting}
-                              onChange={(value) =>
-                                setEditing({ commentId: editing.commentId, text: value })
-                              }
-                            />
-                            <div className="flex justify-end gap-2">
-                              <button
-                                type="button"
-                                className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-                                style={{ color: DARK.muted }}
-                                onClick={() => setEditing(null)}
-                              >
-                                Abbrechen
-                              </button>
-                              <button
-                                type="button"
-                                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
-                                style={{ backgroundColor: STORY_COLORS.profil }}
-                                disabled={submitting || !editing.text.trim()}
-                                onClick={saveEdit}
-                              >
-                                Speichern
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <p
-                              className="mt-1 whitespace-pre-wrap text-sm leading-5"
-                              style={{ color: DARK.muted }}
-                            >
-                              {comment.text}
-                            </p>
-                            {isOwn ? (
-                              <div className="mt-2 flex gap-3">
-                                <button
-                                  type="button"
-                                  className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                                  style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
-                                  onClick={() =>
-                                    setEditing({
-                                      commentId: comment.commentId,
-                                      text: comment.text,
-                                    })
-                                  }
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                                  style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
-                                  onClick={() => void remove(comment.commentId)}
-                                >
-                                  Löschen
-                                </button>
-                              </div>
-                            ) : null}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-
-          <div className="space-y-2">
-            <CommentTextarea
-              value={text}
-              rows={3}
-              placeholder={currentUser ? "Kommentar schreiben..." : "Einloggen zum Kommentieren"}
-              disabled={!currentUser || submitting}
-              onChange={setText}
-            />
-            <div className="flex items-center justify-between">
-              <span
-                className="text-[10px] tabular-nums"
-                style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
-              >
-                {text.length}/{MAX_COMMENT_LENGTH}
-              </span>
-              <button
-                type="button"
-                className="rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white disabled:opacity-40"
-                style={{ backgroundColor: STORY_COLORS.daily, fontFamily: "var(--font-mono)" }}
-                disabled={!currentUser || submitting || !text.trim()}
-                onClick={() => void submit()}
-              >
-                Senden
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <CommentBottomSheet
+        open={sheetOpen}
+        comments={sortedComments}
+        users={users}
+        currentUser={currentUser}
+        text={text}
+        editing={editing}
+        submitting={submitting}
+        error={error}
+        onClose={() => setSheetOpen(false)}
+        onTextChange={setText}
+        onSubmit={() => void submit()}
+        onEditChange={setEditing}
+        onSaveEdit={() => void saveEdit()}
+        onRemove={(commentId) => void remove(commentId)}
+      />
     </section>
   );
 }
@@ -416,8 +285,20 @@ function CommentTextarea({
   disabled?: boolean;
   rows: number;
 }) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const textarea = ref.current;
+    if (!textarea) {
+      return;
+    }
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 132)}px`;
+  }, [value]);
+
   return (
     <textarea
+      ref={ref}
       value={value}
       maxLength={MAX_COMMENT_LENGTH}
       rows={rows}
@@ -431,6 +312,349 @@ function CommentTextarea({
       }}
       onChange={(event) => onChange(event.target.value)}
     />
+  );
+}
+
+function CommentBottomSheet({
+  open,
+  comments,
+  users,
+  currentUser,
+  text,
+  editing,
+  submitting,
+  error,
+  onClose,
+  onTextChange,
+  onSubmit,
+  onEditChange,
+  onSaveEdit,
+  onRemove,
+}: {
+  open: boolean;
+  comments: DailyComment[];
+  users: Map<string, UserDoc>;
+  currentUser: { userId: string; displayName: string; photoURL: string | null } | null;
+  text: string;
+  editing: { commentId: string; text: string } | null;
+  submitting: boolean;
+  error: string | null;
+  onClose: () => void;
+  onTextChange: (value: string) => void;
+  onSubmit: () => void;
+  onEditChange: (value: { commentId: string; text: string } | null) => void;
+  onSaveEdit: () => void;
+  onRemove: (commentId: string) => void;
+}) {
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const dragControls = useDragControls();
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose, open]);
+
+  useEffect(() => {
+    if (!open || !window.visualViewport) {
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    const updateOffset = () => {
+      const offset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      setKeyboardOffset(offset);
+    };
+
+    updateOffset();
+    viewport.addEventListener("resize", updateOffset);
+    viewport.addEventListener("scroll", updateOffset);
+
+    return () => {
+      viewport.removeEventListener("resize", updateOffset);
+      viewport.removeEventListener("scroll", updateOffset);
+    };
+  }, [open]);
+
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.y > 110 || info.velocity.y > 650) {
+      onClose();
+    }
+  };
+
+  return createPortal(
+    <AnimatePresence>
+      {open ? (
+        <div className="fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label="Kommentare">
+          <motion.button
+            type="button"
+            aria-label="Kommentare schließen"
+            className="absolute inset-0 cursor-default"
+            style={{ backgroundColor: "rgba(0,0,0,0.58)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="absolute inset-x-0 bottom-0 mx-auto flex h-[90dvh] max-h-[90dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-[28px] border"
+            style={{
+              "--sheet-keyboard-offset": `${keyboardOffset}px`,
+              backgroundColor: DARK.elevated,
+              borderColor: DARK.hairStrong,
+              color: DARK.text,
+            } as CSSProperties}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 360, damping: 36, mass: 0.8 }}
+            drag="y"
+            dragControls={dragControls}
+            dragListener={false}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.22 }}
+            onDragEnd={handleDragEnd}
+          >
+            <header
+              className="sticky top-0 z-10 flex shrink-0 items-center justify-between border-b px-4 pb-3 pt-2"
+              style={{ borderColor: DARK.hair, backgroundColor: DARK.elevated }}
+            >
+              <button
+                type="button"
+                className="flex flex-1 cursor-grab touch-none justify-center py-2 active:cursor-grabbing"
+                aria-label="Kommentare nach unten ziehen zum Schließen"
+                onPointerDown={(event) => dragControls.start(event)}
+              >
+                <span className="h-1 w-11 rounded-full" style={{ backgroundColor: DARK.hairStrong }} />
+              </button>
+              <button
+                type="button"
+                className="absolute right-4 top-3 inline-flex size-8 items-center justify-center rounded-full text-xl leading-none"
+                style={{ color: DARK.muted, backgroundColor: DARK.hair }}
+                aria-label="Kommentare schließen"
+                onClick={onClose}
+              >
+                ×
+              </button>
+            </header>
+
+            <div className="flex items-center justify-center border-b px-4 py-3" style={{ borderColor: DARK.hair }}>
+              <span className="text-sm font-semibold" style={{ color: DARK.text }}>
+                Kommentare
+              </span>
+              <span
+                className="ml-2 text-[11px] tabular-nums"
+                style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
+              >
+                {comments.length}
+              </span>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+              {error ? (
+                <p
+                  className="mb-3 rounded-lg px-3 py-2 text-xs text-red-200"
+                  style={{ backgroundColor: "#3A1414" }}
+                >
+                  {error}
+                </p>
+              ) : null}
+
+              {comments.length === 0 ? (
+                <div className="flex min-h-[40vh] items-center justify-center text-center">
+                  <p className="text-sm" style={{ color: DARK.muted }}>
+                    Noch keine Kommentare.
+                  </p>
+                </div>
+              ) : (
+                <ul className="divide-y" style={{ borderColor: DARK.hair }}>
+                  {comments.map((comment) => {
+                    const user = users.get(comment.userId);
+                    const isOwn = currentUser?.userId === comment.userId;
+                    const isEditing = editing?.commentId === comment.commentId;
+                    const displayName =
+                      user?.displayName ?? (isOwn ? currentUser.displayName : "Jemand");
+
+                    return (
+                      <li key={comment.commentId} className="py-3">
+                        <div className="flex gap-3">
+                          <AvatarCircle
+                            member={{
+                              userId: comment.userId,
+                              displayName,
+                              photoURL: user?.photoURL ?? null,
+                            }}
+                            size="sm"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline justify-between gap-3">
+                              <span className="text-sm font-semibold" style={{ color: DARK.text }}>
+                                {displayName}
+                              </span>
+                              <span
+                                className="shrink-0 text-[10px] uppercase"
+                                style={{ color: DARK.dim, fontFamily: "var(--font-mono)" }}
+                              >
+                                {formatCommentTime(comment.createdAt)}
+                              </span>
+                            </div>
+
+                            {isEditing ? (
+                              <div className="mt-2 space-y-2">
+                                <CommentTextarea
+                                  value={editing.text}
+                                  rows={2}
+                                  disabled={submitting}
+                                  onChange={(value) =>
+                                    onEditChange({ commentId: editing.commentId, text: value })
+                                  }
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    className="rounded-lg px-3 py-1.5 text-xs font-semibold"
+                                    style={{ color: DARK.muted }}
+                                    onClick={() => onEditChange(null)}
+                                  >
+                                    Abbrechen
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                                    style={{ backgroundColor: STORY_COLORS.profil }}
+                                    disabled={submitting || !editing.text.trim()}
+                                    onClick={onSaveEdit}
+                                  >
+                                    Speichern
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p
+                                  className="mt-1 whitespace-pre-wrap text-sm leading-5"
+                                  style={{ color: DARK.muted }}
+                                >
+                                  {comment.text}
+                                </p>
+                                {isOwn ? (
+                                  <div className="hidden" aria-hidden>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onEditChange({
+                                          commentId: comment.commentId,
+                                          text: comment.text,
+                                        })
+                                      }
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => onRemove(comment.commentId)}
+                                    >
+                                      Löschen
+                                    </button>
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            <footer
+              className="shrink-0 border-t px-4 py-2"
+              style={{
+                borderColor: DARK.hair,
+                backgroundColor: DARK.elevated,
+                paddingBottom: `calc(0.5rem + env(safe-area-inset-bottom) + var(--sheet-keyboard-offset))`,
+              }}
+            >
+              <div className="flex min-h-[52px] items-end gap-2">
+                {currentUser ? (
+                  <AvatarCircle
+                    member={{
+                      userId: currentUser.userId,
+                      displayName: currentUser.displayName,
+                      photoURL: currentUser.photoURL,
+                    }}
+                    size="sm"
+                  />
+                ) : (
+                  <div className="size-8 shrink-0 rounded-full" style={{ backgroundColor: DARK.hair }} />
+                )}
+                <div className="min-w-0 flex-1">
+                  <CommentTextarea
+                    value={text}
+                    rows={1}
+                    placeholder={currentUser ? "Kommentieren..." : "Einloggen zum Kommentieren"}
+                    disabled={!currentUser || submitting}
+                    onChange={onTextChange}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="mb-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-full text-white transition disabled:opacity-35"
+                  style={{ backgroundColor: STORY_COLORS.daily }}
+                  disabled={!currentUser || submitting || !text.trim()}
+                  aria-label="Kommentar senden"
+                  onClick={onSubmit}
+                >
+                  <SendIcon />
+                </button>
+              </div>
+            </footer>
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={18} height={18} aria-hidden>
+      <path
+        d="M4 12 20 4l-4.5 16-3.2-6.4L4 12Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+      <path
+        d="m12.3 13.6 3.2-3.2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { Providers } from "@/app/providers";
@@ -22,6 +22,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Mijija",
   description: "Mijija ist eure private mobile-first Freundesgruppe-App.",
+};
+
+export const viewport: Viewport = {
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({
