@@ -3,10 +3,9 @@ import type { ReactNode } from "react";
 type Tone = "raised" | "flat" | "dark";
 
 const toneClasses: Record<Tone, string> = {
-  raised:
-    "border-slate-200/80 bg-white shadow-card-raised",
-  flat: "border-slate-200/75 bg-[#fbfdff] shadow-card-flat",
-  dark: "border-slate-800/60 bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-cream shadow-card-raised",
+  raised: "border-[#2C2C2E] bg-[#161616] text-[#FAFAFA]",
+  flat: "border-[#1F1F1F] bg-[#0E0E0E] text-[#FAFAFA]",
+  dark: "border-[#2C2C2E] bg-[#161616] text-[#FAFAFA]",
 };
 
 export function Card({
