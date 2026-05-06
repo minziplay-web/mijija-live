@@ -36,6 +36,17 @@ export function mergeDailyState(
       return { ...prevCard, question: incomingCard.question };
     }
 
+    // Hold submitting locally even if the server already saw the answer —
+    // the local flash-timer (400ms loader + 800ms GESPEICHERT) needs the
+    // submitting phase to stay alive so the snapshot doesn't yank the
+    // card out before the user sees the feedback.
+    if (
+      prevCard.phase === "submitting" &&
+      incomingCard.phase === "submitted_waiting_reveal"
+    ) {
+      return { ...prevCard, question: incomingCard.question };
+    }
+
     if (
       incomingCard.phase === "unanswered" &&
       prevCard.phase === "unanswered" &&

@@ -77,17 +77,18 @@ export function StoryShell({
         </span>
       </header>
 
-      {/* question text — sanfter Hintergrund-Block + linker Akzent-Stripe in
-          Tab-Farbe für visuelle Hervorhebung. text-balance für schöne Zeilen. */}
+      {/* question text — sanfter Hintergrund-Block + linker Akzent-Stripe.
+          User-Decision 2026-05-06 R8: Frage größer + mehr Padding damit sie
+          sich klar als Frage abhebt, nicht als beiläufige Zeile. */}
       <div
-        className="mt-4 rounded-xl border-l-[3px] px-3.5 py-3"
+        className="mt-4 rounded-xl border-l-[4px] px-5 py-5"
         style={{
           backgroundColor: STORY_COLORS.bgSubtle,
           borderLeftColor: accent,
         }}
       >
         <h2
-          className="text-[16px] font-medium leading-snug tracking-tight"
+          className="text-[20px] font-semibold leading-[1.25] tracking-tight"
           style={{
             color: STORY_COLORS.ink,
             textWrap: "balance",

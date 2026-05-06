@@ -202,62 +202,69 @@ function DailyAnswersStoryReady({
   };
 
   const handleSubmit = (cardKey: string, draft: DailyAnswerDraft) => {
+    // UI-getriebene Sequenz unabhängig von Server-Speed:
+    //   t=0     → submitting (Loader-Button "WIRD GESENDET")
+    //   t=400   → saved (grüner "GESPEICHERT ✓"-Button)
+    //   t=1200  → submitted_waiting_reveal (Card transitioniert weg)
+    // Server läuft parallel; Fehler bricht die Sequenz und schaltet auf phase=error.
     updateCard(cardKey, (card) => ({
       phase: "submitting",
       question: card.question,
       draft,
     }));
 
-    // Nach erfolgreichem Submit verschwindet die Frage aus openCards (filter
-    // greift). Index bleibt — wenn das die letzte offene Frage war, fällt total
-    // auf 0 und der Empty-State wird gerendert. Sonst rückt automatisch die
-    // nächste offene Karte an dieselbe Index-Stelle.
-
     const currentCard = state.cards.find((c) => getCardKey(c) === cardKey);
+    let aborted = false;
 
-    const flashSavedThenAdvance = () => {
-      // GESPEICHERT-Flash für 700ms, dann Card ausblenden (filter greift)
+    const loaderTimer = window.setTimeout(() => {
+      if (aborted) return;
       setRecentlySaved((prev) => {
         const next = new Set(prev);
         next.add(cardKey);
         return next;
       });
-      window.setTimeout(() => {
-        updateCard(cardKey, (card) => ({
-          phase: "submitted_waiting_reveal",
-          question: card.question,
-          myAnswer: draft,
-        }));
-        setRecentlySaved((prev) => {
-          const next = new Set(prev);
-          next.delete(cardKey);
-          return next;
-        });
-      }, 1200);
+    }, 400);
+
+    const finalTimer = window.setTimeout(() => {
+      if (aborted) return;
+      updateCard(cardKey, (card) => ({
+        phase: "submitted_waiting_reveal",
+        question: card.question,
+        myAnswer: draft,
+      }));
+      setRecentlySaved((prev) => {
+        const next = new Set(prev);
+        next.delete(cardKey);
+        return next;
+      });
+    }, 1200);
+
+    const handleError = (error: unknown) => {
+      aborted = true;
+      window.clearTimeout(loaderTimer);
+      window.clearTimeout(finalTimer);
+      setRecentlySaved((prev) => {
+        const next = new Set(prev);
+        next.delete(cardKey);
+        return next;
+      });
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Antwort konnte nicht gespeichert werden.";
+      updateCard(cardKey, (card) => ({
+        phase: "error",
+        question: card.question,
+        message,
+        lastDraft: draft,
+      }));
     };
 
     if (onSubmitAnswer && currentCard) {
-      void onSubmitAnswer(draft, currentCard)
-        .then(() => {
-          flashSavedThenAdvance();
-        })
-        .catch((error) => {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Antwort konnte nicht gespeichert werden.";
-          updateCard(cardKey, (card) => ({
-            phase: "error",
-            question: card.question,
-            message,
-            lastDraft: draft,
-          }));
-        });
-      return;
+      void onSubmitAnswer(draft, currentCard).catch(handleError);
     }
-
-    // Mock fallback when no submit handler is wired up.
-    window.setTimeout(flashSavedThenAdvance, 350);
+    // Im Mock-Mode (kein onSubmitAnswer) läuft die Sequenz auch durch — die
+    // Timer fahren das Phase-Update wie auf Live-System.
   };
 
   return (
