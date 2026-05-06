@@ -533,18 +533,23 @@ function SubmitButton({
   label: string;
   onClick: () => void;
 }) {
+  // opacity-40 nur wenn der Button "echt" disabled ist (draft incomplete) —
+  // während loading/saved bleibt er voll deckend, wirkt sonst unscharf.
+  const trulyDisabled = disabled && !loading && !saved;
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-[13px] transition disabled:opacity-40"
+      className="flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-[13px]"
       style={{
         backgroundColor: saved ? "#1F8B5A" : STORY_COLORS.antworten,
         color: "#FFFFFF",
         fontFamily: "var(--font-mono)",
         letterSpacing: "0.08em",
         fontWeight: 600,
+        opacity: trulyDisabled ? 0.4 : 1,
+        cursor: disabled ? "default" : "pointer",
       }}
     >
       {saved ? (

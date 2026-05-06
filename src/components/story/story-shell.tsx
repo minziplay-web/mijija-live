@@ -81,14 +81,14 @@ export function StoryShell({
           User-Decision 2026-05-06 R8: Frage größer + mehr Padding damit sie
           sich klar als Frage abhebt, nicht als beiläufige Zeile. */}
       <div
-        className="mt-4 rounded-xl border-l-[4px] px-5 py-5"
+        className="mt-4 rounded-xl border-l-[3px] px-4 py-4"
         style={{
           backgroundColor: STORY_COLORS.bgSubtle,
           borderLeftColor: accent,
         }}
       >
         <h2
-          className="text-[20px] font-semibold leading-[1.25] tracking-tight"
+          className="text-[17px] font-semibold leading-[1.3] tracking-tight"
           style={{
             color: STORY_COLORS.ink,
             textWrap: "balance",
