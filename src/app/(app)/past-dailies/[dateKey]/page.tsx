@@ -4,6 +4,7 @@ import Link from "next/link";
 import { use } from "react";
 
 import { CATEGORY_COLOR, STORY_COLORS } from "@/components/story";
+import { CommentCountBadge } from "@/components/story/inline-comments";
 import { AvatarCircle } from "@/components/ui/avatar";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { ThreeBodyLoader } from "@/components/ui/loader";
@@ -205,7 +206,8 @@ function QuestionList({
                 <RowMeta
                   answerers={answerers}
                   result={card.result}
-                  commentCount={0}
+                  runId={card.question.runId ?? dateKey}
+                  questionId={card.question.questionId}
                 />
               </div>
 
@@ -245,11 +247,13 @@ function CategoryEyebrow({ question }: { question: DailyQuestion }) {
 function RowMeta({
   answerers,
   result,
-  commentCount,
+  runId,
+  questionId,
 }: {
   answerers: MemberLite[];
   result: QuestionResult;
-  commentCount: number;
+  runId: string;
+  questionId: string;
 }) {
   const visible = answerers.slice(0, 4);
   const overflow = answerers.length - visible.length;
@@ -304,7 +308,7 @@ function RowMeta({
         }}
       >
         <CommentIcon />
-        {commentCount}
+        <CommentCountBadge runId={runId} questionId={questionId} />
       </span>
     </div>
   );

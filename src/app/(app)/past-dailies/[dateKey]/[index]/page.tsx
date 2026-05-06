@@ -12,6 +12,7 @@ import {
   StoryShell,
 } from "@/components/story";
 import { MemeImage } from "@/components/daily/meme-image";
+import { InlineCommentsSection } from "@/components/story/inline-comments";
 import { AvatarCircle } from "@/components/ui/avatar";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { ThreeBodyLoader } from "@/components/ui/loader";
@@ -150,6 +151,13 @@ export default function PastDailyStoryPage({
           categoryLabel={CATEGORY_LABELS[card.question.category]}
           questionText={card.question.text}
           body={<RevealBody result={card.result} />}
+          footer={
+            <InlineCommentsSection
+              dateKey={dateKey}
+              runId={card.question.runId ?? dateKey}
+              questionId={card.question.questionId}
+            />
+          }
         />
       </motion.div>
 

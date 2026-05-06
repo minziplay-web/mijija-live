@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 
 import { LockedRevealBody } from "@/components/home/locked-reveal-body";
 import { RevealBody } from "@/components/home/reveal-renderers";
+import { InlineCommentsSection } from "@/components/story/inline-comments";
 import {
   CATEGORY_COLOR,
   STORY_COLORS,
@@ -181,6 +182,15 @@ export function HomeRevealFeed({ state }: { state: ReadyState }) {
                 ) : (
                   <LockedRevealBody />
                 )
+              }
+              footer={
+                answered ? (
+                  <InlineCommentsSection
+                    dateKey={current.dateKey}
+                    runId={current.runId ?? current.dateKey}
+                    questionId={current.questionId}
+                  />
+                ) : undefined
               }
             />
           </motion.div>
