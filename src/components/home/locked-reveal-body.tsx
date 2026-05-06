@@ -53,38 +53,39 @@ export function LockedRevealBody({
       </div>
 
       {/* Lock overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 py-8 text-center">
         <span
-          className="inline-flex size-10 items-center justify-center rounded-full text-base"
+          className="inline-flex size-12 items-center justify-center rounded-full text-lg"
           style={{
             backgroundColor: STORY_COLORS.hairSoft,
-            color: STORY_COLORS.ink,
+            color: STORY_COLORS.daily,
           }}
           aria-hidden
         >
           🔒
         </span>
         <p
-          className="text-[14px] leading-snug"
+          className="text-[15px] leading-snug"
           style={{ color: STORY_COLORS.ink, fontWeight: 600 }}
         >
           Noch nicht beantwortet
         </p>
         <p
-          className="max-w-[26ch] text-[12px] leading-snug"
+          className="max-w-[28ch] text-[13px] leading-relaxed"
           style={{ color: STORY_COLORS.ink50 }}
         >
           {hint}
         </p>
         <Link
           href="/daily"
-          className="mt-1 inline-flex items-center justify-center rounded-full px-4 py-2 text-[12px] tabular-nums transition hover:opacity-90"
+          className="mt-1 inline-flex items-center justify-center rounded-full border px-5 py-2.5 text-[12px] tabular-nums transition hover:bg-[#1F1F1F]"
           style={{
-            backgroundColor: STORY_COLORS.daily,
-            color: "#000000",
+            backgroundColor: "transparent",
+            borderColor: STORY_COLORS.daily,
+            color: STORY_COLORS.daily,
             fontFamily: "var(--font-mono)",
             fontWeight: 600,
-            letterSpacing: "0.06em",
+            letterSpacing: "0.08em",
           }}
         >
           JETZT ANTWORTEN

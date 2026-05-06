@@ -77,10 +77,14 @@ export function StoryShell({
         </span>
       </header>
 
-      {/* question text — sanfter Hintergrund-Block, text-balance */}
+      {/* question text — sanfter Hintergrund-Block + linker Akzent-Stripe in
+          Tab-Farbe für visuelle Hervorhebung. text-balance für schöne Zeilen. */}
       <div
-        className="mt-4 rounded-xl px-3.5 py-3"
-        style={{ backgroundColor: STORY_COLORS.bgSubtle }}
+        className="mt-4 rounded-xl border-l-[3px] px-3.5 py-3"
+        style={{
+          backgroundColor: STORY_COLORS.bgSubtle,
+          borderLeftColor: accent,
+        }}
       >
         <h2
           className="text-[16px] font-medium leading-snug tracking-tight"

@@ -64,7 +64,7 @@ export function EmailPasswordForm() {
           onClick={() => setMode("login")}
           className={`min-h-11 rounded-xl text-sm font-semibold transition ${
             mode === "login"
-              ? "bg-[#F39A2B] text-black"
+              ? "bg-[#4A5699] text-white"
               : "text-[#A8A8A8] hover:bg-[#1F1F1F]"
           }`}
         >
@@ -75,7 +75,7 @@ export function EmailPasswordForm() {
           onClick={() => setMode("register")}
           className={`min-h-11 rounded-xl text-sm font-semibold transition ${
             mode === "register"
-              ? "bg-[#F39A2B] text-black"
+              ? "bg-[#4A5699] text-white"
               : "text-[#A8A8A8] hover:bg-[#1F1F1F]"
           }`}
         >
@@ -94,7 +94,7 @@ export function EmailPasswordForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="freund@beispiel.de"
-          className="min-h-12 w-full rounded-2xl border border-[#2C2C2E] bg-[#000000] px-4 text-base text-[#FAFAFA] outline-none placeholder:text-[#6E6E73] focus:border-[#F39A2B]"
+          className="min-h-12 w-full rounded-2xl border border-[#2C2C2E] bg-[#000000] px-4 text-base text-[#FAFAFA] outline-none placeholder:text-[#6E6E73] focus:border-[#4A5699]"
         />
       </div>
 
@@ -109,15 +109,15 @@ export function EmailPasswordForm() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="mindestens 6 Zeichen"
-          className="min-h-12 w-full rounded-2xl border border-[#2C2C2E] bg-[#000000] px-4 text-base text-[#FAFAFA] outline-none placeholder:text-[#6E6E73] focus:border-[#F39A2B]"
+          className="min-h-12 w-full rounded-2xl border border-[#2C2C2E] bg-[#000000] px-4 text-base text-[#FAFAFA] outline-none placeholder:text-[#6E6E73] focus:border-[#4A5699]"
         />
         {passwordHint ? (
-          <p className="text-xs text-[#F39A2B]">{passwordHint}</p>
+          <p className="text-xs text-[#4A5699]">{passwordHint}</p>
         ) : null}
       </div>
 
       <Button
-        className="w-full bg-[#F39A2B] text-black hover:bg-[#FFB14F] disabled:bg-[#2C2C2E] disabled:text-[#6E6E73]"
+        className="w-full bg-[#4A5699] text-white hover:bg-[#5C68B0] disabled:bg-[#2C2C2E] disabled:text-[#6E6E73]"
         disabled={!email || password.length < 6 || isBusy}
       >
         {isBusy
