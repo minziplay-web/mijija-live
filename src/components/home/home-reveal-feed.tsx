@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion, type PanInfo } from "motion/react";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { animate, motion, useMotionValue, type PanInfo } from "motion/react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { LockedRevealBody } from "@/components/home/locked-reveal-body";
 import { RevealBody } from "@/components/home/reveal-renderers";
@@ -17,6 +17,11 @@ import type { HomeViewState, QuestionResult } from "@/lib/types/frontend";
 
 const SWIPE_DISTANCE = 80;
 const SWIPE_VELOCITY = 360;
+const SLIDE_TRANSITION = {
+  type: "tween",
+  duration: 0.32,
+  ease: [0.22, 0.61, 0.36, 1],
+} as const;
 
 type ReadyState = Extract<HomeViewState, { status: "ready" }>;
 
@@ -60,11 +65,19 @@ export function HomeRevealFeed({ state }: { state: ReadyState }) {
     return () => observer.disconnect();
   }, []);
 
+  const safeIndex = Math.max(0, Math.min(index, Math.max(0, total - 1)));
+  // motion-value-getriebene Animation — kein React-Re-Render pro Frame.
+  const x = useMotionValue(0);
+  useEffect(() => {
+    if (width === 0 || total === 0) return;
+    const controls = animate(x, -safeIndex * width, SLIDE_TRANSITION);
+    return () => controls.stop();
+  }, [safeIndex, width, x, total]);
+
   if (total === 0) {
     return <NoDailySlide displayName={state.greeting.displayName} />;
   }
 
-  const safeIndex = Math.max(0, Math.min(index, total - 1));
   // Page-Akzent = Tab-Farbe (Daily-Orange). Kategorie-Farben sind deprecated.
   const accent = STORY_COLORS.daily;
 
@@ -79,10 +92,17 @@ export function HomeRevealFeed({ state }: { state: ReadyState }) {
     const distance = info.offset.x;
     const velocity = info.velocity.x;
 
+    let nextIndex = safeIndex;
     if (distance < -SWIPE_DISTANCE || velocity < -SWIPE_VELOCITY) {
-      goNext();
+      nextIndex = safeIndex + 1;
     } else if (distance > SWIPE_DISTANCE || velocity > SWIPE_VELOCITY) {
-      goPrev();
+      nextIndex = safeIndex - 1;
+    }
+    const clamped = Math.max(0, Math.min(total - 1, nextIndex));
+    if (clamped === safeIndex) {
+      animate(x, -safeIndex * width, SLIDE_TRANSITION);
+    } else {
+      setIndex(clamped);
     }
   };
 
@@ -127,11 +147,10 @@ export function HomeRevealFeed({ state }: { state: ReadyState }) {
         <motion.div
           className="flex"
           style={{
+            x,
             width: width * total || undefined,
             willChange: "transform",
           }}
-          animate={{ x: -safeIndex * width }}
-          transition={{ type: "tween", duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
           drag={total > 1 ? "x" : false}
           dragConstraints={{ left: -(total - 1) * width, right: 0 }}
           dragElastic={0.18}

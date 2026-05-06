@@ -1,7 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { motion, type PanInfo } from "motion/react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { animate, motion, useMotionValue, type PanInfo } from "motion/react";
 
 import { AvatarCircle } from "@/components/ui/avatar";
 import { MemeImage } from "@/components/daily/meme-image";
@@ -9,6 +9,13 @@ import { STORY_COLORS } from "@/components/story/constants";
 import { HeartIcon } from "@/components/story/comment-icons";
 import { submitMemeCaptionVote } from "@/lib/firebase/daily-actions";
 import type { MemeCaptionResult } from "@/lib/types/frontend";
+
+// iOS-Photo-Album-Easing — smooth deceleration ohne Bounce
+const SLIDE_TRANSITION = {
+  type: "tween",
+  duration: 0.32,
+  ease: [0.22, 0.61, 0.36, 1],
+} as const;
 
 /**
  * MemeCaptionCarousel — pro Caption ein Insta-Post als Slide. Track-basierter
@@ -66,6 +73,16 @@ export function MemeCaptionCarousel({
     return () => observer.disconnect();
   }, []);
 
+  // useMotionValue + imperative animate — Animationen laufen direkt auf dem
+  // motion-value ohne React-Re-Renders pro Frame (deutlich smoother als
+  // animate-prop-driven).
+  const x = useMotionValue(0);
+  useEffect(() => {
+    if (width === 0) return;
+    const controls = animate(x, -safeIndex * width, SLIDE_TRANSITION);
+    return () => controls.stop();
+  }, [safeIndex, width, x]);
+
   const goTo = (next: number) => {
     const target = Math.max(0, Math.min(totalSlides - 1, next));
     if (target === safeIndex) return;
@@ -79,10 +96,18 @@ export function MemeCaptionCarousel({
     info: PanInfo,
   ) => {
     const { offset, velocity } = info;
+    let nextIndex = safeIndex;
     if (offset.x < -SWIPE_DISTANCE || velocity.x < -SWIPE_VELOCITY) {
-      goTo(safeIndex + 1);
+      nextIndex = safeIndex + 1;
     } else if (offset.x > SWIPE_DISTANCE || velocity.x > SWIPE_VELOCITY) {
-      goTo(safeIndex - 1);
+      nextIndex = safeIndex - 1;
+    }
+    const clamped = Math.max(0, Math.min(totalSlides - 1, nextIndex));
+    if (clamped === safeIndex) {
+      // Schwelle nicht überschritten — zurück zur aktuellen Position animieren.
+      animate(x, -safeIndex * width, SLIDE_TRANSITION);
+    } else {
+      setIndex(clamped);
     }
   };
 
@@ -157,11 +182,10 @@ export function MemeCaptionCarousel({
         <motion.div
           className="flex"
           style={{
+            x,
             width: width * totalSlides || undefined,
             willChange: "transform",
           }}
-          animate={{ x: -safeIndex * width }}
-          transition={{ type: "tween", duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
           drag={totalSlides > 1 ? "x" : false}
           dragConstraints={{
             left: -(totalSlides - 1) * width,
@@ -186,9 +210,9 @@ export function MemeCaptionCarousel({
               className="shrink-0"
               style={{ width: width || "100%" }}
             >
-              <CaptionImage
+              <WinnerHero
                 imagePath={result.imagePath}
-                text={winner?.entry.text ?? ""}
+                winnerName={winner?.entry.author?.displayName ?? null}
               />
             </div>
           ) : null}
@@ -294,6 +318,46 @@ function CaptionImage({
       style={{ backgroundColor: STORY_COLORS.hairSoft }}
     >
       <MemeImage imagePath={imagePath} caption={text} frame="standalone" />
+    </div>
+  );
+}
+
+function WinnerHero({
+  imagePath,
+  winnerName,
+}: {
+  imagePath: string;
+  winnerName: string | null;
+}) {
+  return (
+    <div
+      className="relative overflow-hidden rounded-xl"
+      style={{ backgroundColor: STORY_COLORS.hairSoft }}
+    >
+      <MemeImage imagePath={imagePath} frame="standalone" />
+      {winnerName ? (
+        <>
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-28"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+          <div className="pointer-events-none absolute inset-x-0 top-3 flex flex-col items-center gap-1">
+            <span className="anim-crown-bob text-[28px] leading-none">👑</span>
+            <span
+              className="text-[15px] font-semibold tracking-tight"
+              style={{
+                color: "#FFFFFF",
+                textShadow: "0 1px 3px rgba(0,0,0,0.55)",
+              }}
+            >
+              {winnerName}
+            </span>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
