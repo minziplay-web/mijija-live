@@ -28,7 +28,7 @@ const themeClasses: Record<
   },
   profile: {
     shell:
-      "rounded-[30px] border border-white/55 bg-linear-to-br from-brand-light via-profile-primary to-profile-strong px-5 py-5 shadow-[0_20px_50px_rgba(74,86,153,0.26)] text-center",
+      "rounded-[30px] border border-[#2C2C2E] bg-linear-to-br from-[#D860B5] via-[#9F3B83] to-[#161616] px-5 py-5 shadow-[0_20px_50px_rgba(216,96,181,0.22)] text-center",
     eyebrow: "text-white/82",
     title: "text-white",
     subtitle: "text-white/82",

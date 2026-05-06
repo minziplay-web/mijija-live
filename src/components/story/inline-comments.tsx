@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 import { createPortal } from "react-dom";
 
 import { STORY_COLORS } from "@/components/story/constants";
+import { ChatLineIcon, HeartIcon } from "@/components/story/comment-icons";
 import { AvatarCircle } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth/auth-context";
 import { usersCollection } from "@/lib/firebase/collections";
@@ -201,7 +202,7 @@ export function InlineCommentsSection({
           aria-label={likeState.likedByMe ? "Like entfernen" : "Frage liken"}
           onClick={() => void toggleLike()}
         >
-          <HeartIcon filled={likeState.likedByMe} />
+          <HeartIcon size={20} filled={likeState.likedByMe} />
           <span
             className="text-[11px] tabular-nums"
             style={{ fontFamily: "var(--font-mono)" }}
@@ -218,7 +219,7 @@ export function InlineCommentsSection({
           aria-label="Kommentare anzeigen"
           onClick={() => setSheetOpen(true)}
         >
-          <CommentIcon />
+          <ChatLineIcon size={20} />
           <span
             className="text-[11px] tabular-nums"
             style={{ fontFamily: "var(--font-mono)" }}
@@ -653,34 +654,6 @@ function SendIcon() {
         stroke="currentColor"
         strokeWidth={1.8}
         strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden>
-      <path
-        d="M12 20.5S4.5 16.1 4.5 9.7A4 4 0 0 1 12 7.8a4 4 0 0 1 7.5 1.9c0 6.4-7.5 10.8-7.5 10.8Z"
-        fill={filled ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CommentIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width={20} height={20} aria-hidden>
-      <path
-        d="M4 5.5h16v10.5H10l-4 3.5v-3.5H4v-10.5Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.7}
-        strokeLinejoin="round"
       />
     </svg>
   );

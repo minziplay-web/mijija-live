@@ -25,7 +25,7 @@ export function AvatarUploader({
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="relative flex size-28 items-center justify-center overflow-hidden rounded-full bg-sand-900 text-3xl font-semibold text-cream ring-4 ring-white"
+        className="relative flex size-28 items-center justify-center overflow-hidden rounded-full bg-[#161616] text-3xl font-semibold text-[#FAFAFA] ring-4 ring-[#2C2C2E]"
       >
         {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -37,7 +37,7 @@ export function AvatarUploader({
         ) : (
           initials
         )}
-        <span className="absolute inset-x-0 bottom-0 bg-sand-900/80 py-1 text-[10px] font-semibold uppercase tracking-wider">
+        <span className="absolute inset-x-0 bottom-0 bg-black/80 py-1 text-[10px] font-semibold uppercase tracking-wider">
           {previewUrl ? "Ändern" : "Hochladen"}
         </span>
       </button>
@@ -55,7 +55,7 @@ export function AvatarUploader({
         <button
           type="button"
           onClick={onClear}
-          className="text-xs font-medium text-sand-500 underline underline-offset-2"
+          className="text-xs font-medium text-[#A8A8A8] underline underline-offset-2"
         >
           Bild entfernen
         </button>

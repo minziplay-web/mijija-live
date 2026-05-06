@@ -25,18 +25,18 @@ export function MemberRail({
                 }
                 className={`relative flex min-h-21 w-20 flex-col items-center gap-2 rounded-2xl border px-2 py-3 shadow-card-flat transition ${
                   active
-                    ? "border-profile-primary/45 bg-profile-soft"
-                    : "border-profile-primary/14 bg-white hover:border-profile-primary/30 hover:bg-profile-wash"
+                    ? "border-[#D860B5]/60 bg-[#241320]"
+                    : "border-[#1F1F1F] bg-[#161616] hover:border-[#D860B5]/35 hover:bg-[#1F1F1F]"
                 }`}
               >
                 <AvatarCircle member={m} size="md" />
-                <span className="line-clamp-1 text-xs font-medium text-sand-800">
+                <span className="line-clamp-1 text-xs font-medium text-[#FAFAFA]">
                   {m.displayName}
                 </span>
                 {active ? (
                   <span
                     aria-hidden
-                    className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-brand-primary"
+                    className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-[#D860B5]"
                   />
                 ) : null}
               </Link>

@@ -50,18 +50,18 @@ export function ProfileNameEditor({ user }: { user: AppUser }) {
   };
 
   return (
-    <section className="space-y-3 rounded-3xl border border-brand-primary/35 bg-white p-4 shadow-card-flat">
+    <section className="space-y-3 rounded-3xl border border-[#2C2C2E] bg-[#161616] p-4 shadow-card-flat">
       <div className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sand-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A8A8A8]">
           Anzeigename
         </p>
-        <p className="text-sm text-sand-700">
+        <p className="text-sm text-[#A8A8A8]">
           So erscheinst du in Fragen, Ergebnissen und im Profil.
         </p>
       </div>
-      <div className="space-y-4 rounded-2xl border border-dashed border-brand-primary/35 bg-profile-wash p-4">
+      <div className="space-y-4 rounded-2xl border border-dashed border-[#2C2C2E] bg-[#000000] p-4">
         <TextField
-          label="Anzeigename"
+          aria-label="Anzeigename"
           value={draft}
           onChange={(event) => {
             setDraft(event.target.value);
@@ -73,6 +73,7 @@ export function ProfileNameEditor({ user }: { user: AppUser }) {
           placeholder="z. B. Leon"
           maxLength={24}
           error={nameError}
+          className="border-[#2C2C2E] bg-[#161616] text-[#FAFAFA] placeholder:text-[#6E6E73] focus:border-[#D860B5] focus:ring-[#D860B5]/25"
         />
         {status === "error" && error ? <ErrorBanner message={error} /> : null}
         <div className="flex gap-3">
@@ -86,7 +87,7 @@ export function ProfileNameEditor({ user }: { user: AppUser }) {
           </Button>
           <Button
             variant="ghost"
-            className="flex-1 text-brand-primary hover:bg-profile-soft hover:text-profile-strong"
+            className="flex-1 text-[#D860B5] hover:bg-[#241320] hover:text-[#E277C3]"
             onClick={handleCancel}
           >
             Zurücksetzen

@@ -17,6 +17,8 @@ import { SkeletonCard } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth/auth-context";
 import type { ProfileViewState } from "@/lib/types/frontend";
 
+const PROFILE_ACCENT = "#D860B5";
+
 export function ProfileScreen({ state }: { state: ProfileViewState }) {
   const { logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -53,7 +55,7 @@ export function ProfileScreen({ state }: { state: ProfileViewState }) {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="min-h-dvh space-y-5 bg-[#000000] text-[#FAFAFA]">
       <ScreenHeader
         eyebrow={state.isSelf ? "Mein Bereich" : "Mitglied"}
         title={state.isSelf ? "Profil" : state.user.displayName}
@@ -97,7 +99,10 @@ export function ProfileScreen({ state }: { state: ProfileViewState }) {
 
       {state.isSelf ? (
         <section className="space-y-3">
-          <h2 className="px-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-primary">
+          <h2
+            className="px-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: PROFILE_ACCENT }}
+          >
             Meine letzten Dailys
           </h2>
           <DailyHistoryList entries={state.dailyHistory} />
@@ -105,7 +110,10 @@ export function ProfileScreen({ state }: { state: ProfileViewState }) {
       ) : null}
 
       <section className="space-y-3">
-        <h2 className="px-1 text-sm font-semibold uppercase tracking-[0.14em] text-brand-primary">
+        <h2
+          className="px-1 text-sm font-semibold uppercase tracking-[0.14em]"
+          style={{ color: PROFILE_ACCENT }}
+        >
           Mitglieder
         </h2>
         <MemberRail members={state.members} activeUserId={state.user.userId} />
@@ -126,7 +134,8 @@ export function ProfileScreen({ state }: { state: ProfileViewState }) {
           <button
             type="button"
             onClick={() => logout()}
-            className="mx-auto block min-h-10 text-sm font-medium text-brand-primary underline underline-offset-2 hover:text-profile-strong"
+            className="mx-auto block min-h-10 text-sm font-medium underline underline-offset-2 transition hover:opacity-80"
+            style={{ color: PROFILE_ACCENT }}
           >
             Abmelden
           </button>

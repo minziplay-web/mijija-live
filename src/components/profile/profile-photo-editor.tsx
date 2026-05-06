@@ -74,18 +74,18 @@ export function ProfilePhotoEditor({ user }: { user: AppUser }) {
   };
 
   return (
-    <section className="space-y-3 rounded-3xl border border-brand-primary/35 bg-white p-4 shadow-card-flat">
+    <section className="space-y-3 rounded-3xl border border-[#2C2C2E] bg-[#161616] p-4 shadow-card-flat">
       <div className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sand-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A8A8A8]">
           Profilbild
         </p>
-        <p className="text-sm text-sand-700">
+        <p className="text-sm text-[#A8A8A8]">
           {user.photoURL
             ? "Du kannst dein Bild austauschen oder wieder entfernen."
             : "Wenn du magst, gib deinem Profil noch ein Gesicht."}
         </p>
       </div>
-      <div className="space-y-4 rounded-2xl border border-dashed border-brand-primary/35 bg-profile-wash p-4">
+      <div className="space-y-4 rounded-2xl border border-dashed border-[#2C2C2E] bg-[#000000] p-4">
         <AvatarUploader
           displayName={user.displayName}
           previewUrl={previewUrl}
@@ -104,7 +104,7 @@ export function ProfilePhotoEditor({ user }: { user: AppUser }) {
           </Button>
           <Button
             variant="ghost"
-            className="flex-1 text-brand-primary hover:bg-profile-soft hover:text-profile-strong"
+            className="flex-1 text-[#D860B5] hover:bg-[#241320] hover:text-[#E277C3]"
             onClick={handleCancel}
           >
             Zurücksetzen

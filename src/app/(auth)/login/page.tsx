@@ -22,19 +22,19 @@ export default function LoginPage() {
 
   return (
     <AppShell hideNav>
-      <div className="flex min-h-dvh items-center">
-        <Card className="w-full space-y-6 bg-white">
+      <div className="flex min-h-dvh items-center bg-[#000000] px-1">
+        <Card className="w-full space-y-6 border-[#2C2C2E] bg-[#161616] text-[#FAFAFA] shadow-[0_24px_80px_-42px_rgba(0,0,0,0.9)]">
           <div className="space-y-3">
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-sand-500">
+            <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#F39A2B]">
               Login
             </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-sand-950">
-            Rein in die Gruppe
-          </h1>
-          <p className="text-sm leading-6 text-sand-600">
-            Melde dich mit Google oder klassisch per E-Mail und Passwort an.
-          </p>
-        </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-[#FAFAFA]">
+              Rein in die Gruppe
+            </h1>
+            <p className="text-sm leading-6 text-[#A8A8A8]">
+              Melde dich mit Google oder klassisch per E-Mail und Passwort an.
+            </p>
+          </div>
           <EmailPasswordForm />
         </Card>
       </div>

@@ -25,7 +25,7 @@ const variantClasses: Record<Variant, string> = {
   recap:
     "bg-linear-to-r from-recap-primary to-recap-strong text-white shadow-[0_12px_28px_-12px_rgba(126,91,174,0.5)] hover:from-[#6E4A9C] hover:to-[#2E1F58] active:translate-y-px",
   profile:
-    "bg-linear-to-r from-profile-primary to-profile-strong text-white shadow-[0_12px_28px_-12px_rgba(74,86,153,0.55)] hover:from-[#3C477F] hover:to-[#101D46] active:translate-y-px",
+    "bg-linear-to-r from-[#D860B5] to-[#9F3B83] text-white shadow-[0_12px_28px_-12px_rgba(216,96,181,0.55)] hover:from-[#E277C3] hover:to-[#84306C] active:translate-y-px",
   archive:
     "bg-linear-to-r from-archive-primary to-archive-text text-white shadow-[0_12px_28px_-12px_rgba(110,26,40,0.5)] hover:from-[#5A1421] hover:to-archive-strong active:translate-y-px",
 };

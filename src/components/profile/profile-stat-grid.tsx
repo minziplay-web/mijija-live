@@ -20,30 +20,28 @@ export function ProfileStatGrid({ stats }: { stats: ProfileStats }) {
       {items.map((item) => (
         <div
           key={item.label}
-          className={`rounded-[1.25rem] p-[1px] ${
-            item.hasData
-              ? accentShellClasses[item.accent ?? "default"]
-              : "bg-linear-to-br from-sand-200/90 to-sand-100/80"
-          }`}
+          className="rounded-[1.25rem] p-[1px]"
+          style={{
+            background: item.hasData
+              ? accentShellGradients[item.accent ?? "default"]
+              : "linear-gradient(135deg, #2C2C2E, #1F1F1F)",
+          }}
         >
           <div
-            className={`flex min-h-[7.7rem] flex-col rounded-[1.18rem] border p-3 transition sm:p-4 ${
-              item.hasData
-                ? "border-white/80 bg-white shadow-card-flat"
-                : "border-dashed border-sand-200 bg-profile-wash"
-            }`}
+            className="flex min-h-[7.7rem] flex-col rounded-[1.18rem] border border-[#1F1F1F] bg-[#161616] p-3 transition sm:p-4"
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-sand-500 min-[380px]:text-[10px]">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#A8A8A8] min-[380px]:text-[10px]">
                 {item.label}
               </p>
               <span
                 aria-hidden
-                className={`flex size-8 shrink-0 items-center justify-center rounded-full text-base ${
-                  item.hasData
-                    ? iconAccentClasses[item.accent ?? "default"]
-                    : "bg-white text-sand-400 ring-1 ring-sand-200"
-                }`}
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-base ring-1"
+                style={{
+                  backgroundColor: item.hasData ? "#241320" : "#1F1F1F",
+                  color: item.hasData ? "#D860B5" : "#6E6E73",
+                  borderColor: "#2C2C2E",
+                }}
               >
                 {item.icon}
               </span>
@@ -54,14 +52,14 @@ export function ProfileStatGrid({ stats }: { stats: ProfileStats }) {
                   ? "line-clamp-2 break-words text-[clamp(0.98rem,4vw,1.16rem)] leading-tight"
                   : "text-[clamp(1.35rem,5.5vw,1.75rem)] leading-none"
               } ${
-                item.hasData ? "text-sand-900" : "text-sand-400"
+                item.hasData ? "text-[#FAFAFA]" : "text-[#6E6E73]"
               }`}
             >
               {item.value}
             </p>
             <p
               className={`mt-auto pt-2 text-[10.5px] leading-snug ${
-                item.hasData ? "text-sand-500" : "text-sand-400"
+                item.hasData ? "text-[#A8A8A8]" : "text-[#6E6E73]"
               }`}
             >
               {item.helper}
@@ -73,20 +71,12 @@ export function ProfileStatGrid({ stats }: { stats: ProfileStats }) {
   );
 }
 
-const accentShellClasses = {
-  default: "bg-linear-to-br from-brand-primary/35 via-profile-soft to-white",
-  streak: "bg-linear-to-br from-profile-primary/45 via-profile-soft to-white",
-  votes: "bg-linear-to-br from-brand-primary/32 via-profile-wash to-white",
-  trophy: "bg-linear-to-br from-award-primary via-award-soft to-white",
-  duels: "bg-linear-to-br from-profile-strong/28 via-profile-soft to-white",
-} as const;
-
-const iconAccentClasses = {
-  default: "bg-profile-soft text-profile-text ring-1 ring-profile-primary/18",
-  streak: "bg-profile-soft text-profile-text ring-1 ring-profile-primary/18",
-  votes: "bg-profile-soft text-profile-text ring-1 ring-profile-primary/18",
-  trophy: "bg-award-soft text-award-text ring-1 ring-award-primary/35",
-  duels: "bg-profile-soft text-profile-text ring-1 ring-profile-primary/18",
+const accentShellGradients = {
+  default: "linear-gradient(135deg, rgba(216,96,181,0.62), #2C2C2E)",
+  streak: "linear-gradient(135deg, rgba(216,96,181,0.72), #2C2C2E)",
+  votes: "linear-gradient(135deg, rgba(216,96,181,0.62), #1F1F1F)",
+  trophy: "linear-gradient(135deg, rgba(240,208,67,0.7), rgba(216,96,181,0.35))",
+  duels: "linear-gradient(135deg, rgba(216,96,181,0.5), #2C2C2E)",
 } as const;
 
 function buildStatCards(stats: ProfileStats): StatCard[] {
