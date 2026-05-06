@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   return (
     <AppShell hideNav>
-      <div className="flex min-h-dvh items-center bg-[#000000] px-1">
+      <div className="-mx-4 -mt-4 flex min-h-dvh items-center bg-[#000000] px-5">
         <Card className="w-full space-y-6 border-[#2C2C2E] bg-[#161616] text-[#FAFAFA] shadow-[0_24px_80px_-42px_rgba(0,0,0,0.9)]">
           <div className="space-y-3">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#F39A2B]">

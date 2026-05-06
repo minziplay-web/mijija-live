@@ -42,7 +42,7 @@ export function EmailPasswordForm() {
       <Button
         type="button"
         variant="secondary"
-        className="w-full border border-[#2C2C2E] bg-[#000000] text-[#FAFAFA] hover:bg-[#1F1F1F]"
+        className="w-full border border-[#2C2C2E] bg-[#000000] text-[#FAFAFA] hover:bg-[#1F1F1F] disabled:bg-[#000000] disabled:text-[#6E6E73]"
         disabled={isBusy}
         onClick={() => void loginWithGoogle()}
       >
@@ -117,7 +117,7 @@ export function EmailPasswordForm() {
       </div>
 
       <Button
-        className="w-full bg-[#F39A2B] text-black hover:bg-[#FFB14F]"
+        className="w-full bg-[#F39A2B] text-black hover:bg-[#FFB14F] disabled:bg-[#2C2C2E] disabled:text-[#6E6E73]"
         disabled={!email || password.length < 6 || isBusy}
       >
         {isBusy

@@ -2,6 +2,7 @@
 
 import { onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { AvatarCircle } from "@/components/ui/avatar";
@@ -50,6 +51,7 @@ type NotificationPanelState =
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const state = useNotificationPanelState(open);
+  const canPortal = typeof document !== "undefined";
 
   return (
     <>
@@ -77,12 +79,15 @@ export function NotificationBell() {
         ) : null}
       </button>
 
-      {open ? (
-        <NotificationPanel
-          state={state}
-          onClose={() => setOpen(false)}
-        />
-      ) : null}
+      {open && canPortal
+        ? createPortal(
+            <NotificationPanel
+              state={state}
+              onClose={() => setOpen(false)}
+            />,
+            document.body,
+          )
+        : null}
     </>
   );
 }
@@ -110,7 +115,7 @@ function NotificationPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Tageslog">
+    <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-label="Tageslog">
       <button
         type="button"
         className="absolute inset-0 h-full w-full backdrop-blur-[2px]"
@@ -120,7 +125,7 @@ function NotificationPanel({
       />
 
       <section
-        className="absolute inset-x-0 bottom-0 max-h-[82dvh] overflow-hidden rounded-t-2xl border-t shadow-[0_-18px_54px_-30px_rgba(0,0,0,0.8)] sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-14 sm:w-[360px] sm:max-w-[calc(100vw-24px)] sm:rounded-2xl sm:border sm:shadow-[0_20px_70px_-38px_rgba(0,0,0,0.9)]"
+        className="absolute inset-x-0 bottom-0 max-h-[82dvh] overflow-hidden rounded-t-2xl border-t shadow-[0_-18px_54px_-30px_rgba(0,0,0,0.8)] sm:inset-x-auto sm:bottom-auto sm:right-3 sm:top-12 sm:w-[360px] sm:max-w-[calc(100vw-24px)] sm:rounded-2xl sm:border sm:shadow-[0_20px_70px_-38px_rgba(0,0,0,0.9)]"
         style={{ backgroundColor: DARK.elevated, borderColor: DARK.hairStrong }}
       >
         <header className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: DARK.hair }}>
