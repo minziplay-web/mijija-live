@@ -15,6 +15,7 @@ import { InlineCommentsSection } from "@/components/story/inline-comments";
 import { AvatarCircle } from "@/components/ui/avatar";
 import { ErrorBanner } from "@/components/ui/error-banner";
 import { ThreeBodyLoader } from "@/components/ui/loader";
+import { useAuth } from "@/lib/auth/auth-context";
 import { useDailyViewState } from "@/lib/firebase/daily";
 import { CATEGORY_LABELS } from "@/lib/mapping/categories";
 import { formatBerlinDateLabel } from "@/lib/mapping/date";
@@ -55,6 +56,9 @@ export default function PastDailyStoryPage({
   const { dateKey, index: rawIndex } = use(params);
   const router = useRouter();
   const state = useDailyViewState(dateKey);
+  const { authState } = useAuth();
+  const currentUserId =
+    authState.status === "authenticated" ? authState.user.userId : undefined;
 
   const parsedIndex = Number.parseInt(rawIndex, 10);
   const safeIndex = Number.isFinite(parsedIndex) && parsedIndex >= 0 ? parsedIndex : 0;
@@ -149,7 +153,15 @@ export default function PastDailyStoryPage({
           categoryLabel={CATEGORY_LABELS[card.question.category]}
           accentColor={STORY_COLORS.archiv}
           questionText={card.question.text}
-          body={<RevealBody result={card.result} />}
+          body={
+            <RevealBody
+              result={card.result}
+              runId={card.question.runId ?? dateKey}
+              dateKey={dateKey}
+              questionId={card.question.questionId}
+              currentUserId={currentUserId}
+            />
+          }
           footer={
             <InlineCommentsSection
               dateKey={dateKey}
@@ -264,7 +276,19 @@ function PagerControls({
 // Reveal-Body — Type-spezifischer Renderer.
 // ----------------------------------------------------------------------------
 
-function RevealBody({ result }: { result: QuestionResult }) {
+function RevealBody({
+  result,
+  runId,
+  dateKey,
+  questionId,
+  currentUserId,
+}: {
+  result: QuestionResult;
+  runId?: string;
+  dateKey?: string;
+  questionId?: string;
+  currentUserId?: string;
+}) {
   // Archiv-Page-Akzent = Coral (Archiv-Tab-Farbe).
   const accent = STORY_COLORS.archiv;
 
@@ -286,7 +310,16 @@ function RevealBody({ result }: { result: QuestionResult }) {
     return <OpenTextRevealBody result={result} />;
   }
 
-  return <MemeCaptionRevealBody result={result} accentColor={accent} />;
+  return (
+    <MemeCaptionRevealBody
+      result={result}
+      accentColor={accent}
+      runId={runId}
+      dateKey={dateKey}
+      questionId={questionId}
+      currentUserId={currentUserId}
+    />
+  );
 }
 
 function OpenTextRevealBody({ result }: { result: OpenTextResult }) {
@@ -339,11 +372,28 @@ function OpenTextRevealBody({ result }: { result: OpenTextResult }) {
 function MemeCaptionRevealBody({
   result,
   accentColor,
+  runId,
+  dateKey,
+  questionId,
+  currentUserId,
 }: {
   result: MemeCaptionResult;
   accentColor: string;
+  runId?: string;
+  dateKey?: string;
+  questionId?: string;
+  currentUserId?: string;
 }) {
-  return <MemeCaptionCarousel result={result} accentColor={accentColor} />;
+  return (
+    <MemeCaptionCarousel
+      result={result}
+      accentColor={accentColor}
+      runId={runId}
+      dateKey={dateKey}
+      questionId={questionId}
+      currentUserId={currentUserId}
+    />
+  );
 }
 
 function NoVotesPlaceholder() {

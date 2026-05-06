@@ -144,7 +144,14 @@ export function HomeRevealFeed({ state }: { state: ReadyState }) {
               accentColor={accent}
               body={
                 answered ? (
-                  <RevealBody result={current.result} accentColor={accent} />
+                  <RevealBody
+                    result={current.result}
+                    accentColor={accent}
+                    runId={current.runId ?? current.dateKey}
+                    dateKey={current.dateKey}
+                    questionId={current.questionId}
+                    currentUserId={currentUserId}
+                  />
                 ) : (
                   <LockedRevealBody />
                 )

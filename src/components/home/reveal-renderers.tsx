@@ -34,9 +34,17 @@ import type {
 export function RevealBody({
   result,
   accentColor,
+  runId,
+  dateKey,
+  questionId,
+  currentUserId,
 }: {
   result: QuestionResult;
   accentColor: string;
+  runId?: string;
+  dateKey?: string;
+  questionId?: string;
+  currentUserId?: string;
 }) {
   switch (result.questionType) {
     case "single_choice":
@@ -52,7 +60,16 @@ export function RevealBody({
     case "open_text":
       return <OpenTextBody result={result} />;
     case "meme_caption":
-      return <MemeCaptionBody result={result} accentColor={accentColor} />;
+      return (
+        <MemeCaptionBody
+          result={result}
+          accentColor={accentColor}
+          runId={runId}
+          dateKey={dateKey}
+          questionId={questionId}
+          currentUserId={currentUserId}
+        />
+      );
   }
 }
 
@@ -370,9 +387,26 @@ function OpenTextBody({ result }: { result: OpenTextResult }) {
 function MemeCaptionBody({
   result,
   accentColor,
+  runId,
+  dateKey,
+  questionId,
+  currentUserId,
 }: {
   result: MemeCaptionResult;
   accentColor: string;
+  runId?: string;
+  dateKey?: string;
+  questionId?: string;
+  currentUserId?: string;
 }) {
-  return <MemeCaptionCarousel result={result} accentColor={accentColor} />;
+  return (
+    <MemeCaptionCarousel
+      result={result}
+      accentColor={accentColor}
+      runId={runId}
+      dateKey={dateKey}
+      questionId={questionId}
+      currentUserId={currentUserId}
+    />
+  );
 }
