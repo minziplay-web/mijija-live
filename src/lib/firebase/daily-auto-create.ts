@@ -6,13 +6,14 @@ import {
   DEFAULT_DAILY_CATEGORIES,
 } from "@/lib/daily/daily-run-generator";
 import { isUserTrophyQuestion } from "@/lib/daily/custom-daily-questions";
-import { berlinDateKey } from "@/lib/mapping/date";
+import { berlinDateKey, shiftDateKey } from "@/lib/mapping/date";
 import type { Category, DateKey } from "@/lib/types/frontend";
 import type { AppConfigDoc, QuestionDoc, UserDoc } from "@/lib/types/firestore";
 
 import { getFirebaseAdminDb } from "@/lib/firebase/admin-server";
 
 const SYSTEM_CREATED_BY = "__system__";
+const ACTIVITY_EVENT_RETENTION_DAYS = 7;
 
 export async function maybeAutoCreateDailyRun(
   now: Date = new Date(),
@@ -52,6 +53,7 @@ export async function maybeAutoCreateDailyRun(
 
   const runRef = db.collection("dailyRuns").doc(dateKey);
   const existingRun = await runRef.get();
+  const cleanup = await cleanupOldActivityEventsBestEffort(dateKey);
 
   if (existingRun.exists) {
     if (options?.force !== true) {
@@ -61,6 +63,7 @@ export async function maybeAutoCreateDailyRun(
       status: "skipped" as const,
       reason: "already_exists",
       dateKey,
+      cleanup,
       message: `Für ${dateKey} existiert bereits ein Daily.`,
     };
   }
@@ -150,6 +153,51 @@ export async function maybeAutoCreateDailyRun(
     status: "created" as const,
     dateKey: dateKey as DateKey,
     questionCount: payload.questionCount,
+    cleanup,
     message: `Daily für ${dateKey} automatisch erzeugt.`,
   };
+}
+
+async function cleanupOldActivityEventsBestEffort(dateKey: DateKey) {
+  try {
+    const deletedCount = await deleteOldActivityEvents(dateKey);
+    return {
+      ok: true as const,
+      deletedCount,
+      olderThanDateKey: shiftDateKey(dateKey, -ACTIVITY_EVENT_RETENTION_DAYS),
+    };
+  } catch (error) {
+    console.warn("[daily-rollover] activityEvents cleanup failed", error);
+    return {
+      ok: false as const,
+      deletedCount: 0,
+      olderThanDateKey: shiftDateKey(dateKey, -ACTIVITY_EVENT_RETENTION_DAYS),
+    };
+  }
+}
+
+async function deleteOldActivityEvents(dateKey: DateKey) {
+  const db = getFirebaseAdminDb();
+  const olderThanDateKey = shiftDateKey(dateKey, -ACTIVITY_EVENT_RETENTION_DAYS);
+  let deletedCount = 0;
+
+  while (true) {
+    const snapshot = await db
+      .collection("activityEvents")
+      .where("dateKey", "<", olderThanDateKey)
+      .limit(450)
+      .get();
+
+    if (snapshot.empty) {
+      return deletedCount;
+    }
+
+    const batch = db.batch();
+    for (const eventDoc of snapshot.docs) {
+      batch.delete(eventDoc.ref);
+    }
+
+    await batch.commit();
+    deletedCount += snapshot.size;
+  }
 }

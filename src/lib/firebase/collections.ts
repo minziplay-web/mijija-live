@@ -69,6 +69,26 @@ export function dailyMemeVoteDoc(docId: string) {
   return db ? doc(db, "dailyMemeVotes", docId) : null;
 }
 
+export function activityEventsCollection() {
+  const { db } = getFirebaseServices();
+  return db ? collection(db, "activityEvents") : null;
+}
+
+export function activityEventDoc(eventId: string) {
+  const { db } = getFirebaseServices();
+  return db ? doc(db, "activityEvents", eventId) : null;
+}
+
+export function dailyCommentsCollection() {
+  const { db } = getFirebaseServices();
+  return db ? collection(db, "dailyComments") : null;
+}
+
+export function dailyCommentDoc(commentId: string) {
+  const { db } = getFirebaseServices();
+  return db ? doc(db, "dailyComments", commentId) : null;
+}
+
 export function liveSessionsCollection() {
   const { db } = getFirebaseServices();
   return db ? collection(db, "liveSessions") : null;

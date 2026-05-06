@@ -716,6 +716,28 @@ export interface AdminConfigDraft {
 
 export type AdminTab = "questions" | "daily" | "members" | "config";
 
+export type ActivityFeedItemKind =
+  | "answer_submitted"
+  | "comment_created"
+  | "meme_winner";
+
+export interface ActivityFeedItem {
+  id: string;
+  kind: ActivityFeedItemKind;
+  actorUserId: string;
+  actorDisplayName: string;
+  questionId?: string;
+  runId?: string;
+  text: string;
+  timeLabel: string;
+  createdAtMs: number;
+  payload?: {
+    commentPreview?: string;
+    memeWinnerUserId?: string;
+    memeWinnerDisplayName?: string;
+  };
+}
+
 export type AdminViewState =
   | { status: "loading" }
   | { status: "forbidden" }

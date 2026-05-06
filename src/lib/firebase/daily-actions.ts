@@ -16,6 +16,7 @@ import {
   dailyPrivateAnswerDoc,
   questionsCollection,
 } from "@/lib/firebase/collections";
+import { logAnswerSubmittedActivity } from "@/lib/firebase/activity-events";
 import { shouldHideUserTrophyQuestionForUser } from "@/lib/daily/custom-daily-questions";
 import { assertValidDraftForQuestion } from "@/lib/mapping/answer-guards";
 import { resolveDailyRunStatus } from "@/lib/mapping/daily-run";
@@ -131,6 +132,17 @@ export async function submitDailyAnswer(params: {
 
     transaction.set(publicRef, nextPublic, { merge: true });
   });
+
+  try {
+    await logAnswerSubmittedActivity({
+      dateKey,
+      runId,
+      questionId: question.questionId,
+      userId: user.userId,
+    });
+  } catch {
+    // Activity logging must not block or undo the saved answer.
+  }
 
   if (!shouldTryFirstAnswerLock) {
     return;

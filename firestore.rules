@@ -97,6 +97,98 @@ service cloud.firestore {
       ]);
     }
 
+    function hasOnlyActivityEventFields(data) {
+      return data.keys().hasOnly([
+        "dateKey",
+        "type",
+        "userId",
+        "questionId",
+        "runId",
+        "payload",
+        "createdAt",
+      ]);
+    }
+
+    function hasValidActivityEventPayload(data) {
+      return !("payload" in data)
+        || data.payload == null
+        || (
+          data.payload is map
+          && data.payload.keys().hasOnly(["commentPreview", "memeWinnerUserId"])
+          && (!("commentPreview" in data.payload) || data.payload.commentPreview is string)
+          && (!("memeWinnerUserId" in data.payload) || data.payload.memeWinnerUserId is string)
+        );
+    }
+
+    function hasValidActivityEventBase(data) {
+      return hasOnlyActivityEventFields(data)
+        && data.dateKey is string
+        && data.type in ["answer_submitted", "comment_created", "meme_winner"]
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && (!("questionId" in data) || data.questionId is string)
+        && (!("runId" in data) || data.runId is string)
+        && hasValidActivityEventPayload(data);
+    }
+
+    function hasValidAnswerSubmittedEvent(eventId, data) {
+      return hasValidActivityEventBase(data)
+        && data.type == "answer_submitted"
+        && data.runId is string
+        && data.questionId is string
+        && eventId == data.dateKey + "_answer_submitted_" + data.userId + "_" + data.questionId
+        && questionInDailyRun(data.runId, data.questionId);
+    }
+
+    function hasValidCommentCreatedEvent(eventId, data) {
+      return hasValidActivityEventBase(data)
+        && data.type == "comment_created"
+        && data.runId is string
+        && data.questionId is string
+        && eventId.matches(data.dateKey + "_comment_created_" + data.userId + "_.*")
+        && questionInDailyRun(data.runId, data.questionId);
+    }
+
+    function hasValidActivityEventCreate(eventId, data) {
+      return hasValidAnswerSubmittedEvent(eventId, data)
+        || hasValidCommentCreatedEvent(eventId, data);
+    }
+
+    function hasOnlyDailyCommentFields(data) {
+      return data.keys().hasOnly([
+        "dateKey",
+        "runId",
+        "questionId",
+        "userId",
+        "text",
+        "createdAt",
+        "editedAt",
+      ]);
+    }
+
+    function hasValidDailyCommentCreate(data) {
+      return hasOnlyDailyCommentFields(data)
+        && data.dateKey is string
+        && data.runId is string
+        && data.questionId is string
+        && data.userId == request.auth.uid
+        && data.text is string
+        && data.text.size() > 0
+        && data.text.size() <= 1000
+        && questionInDailyRun(data.runId, data.questionId);
+    }
+
+    function hasValidDailyCommentUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(["text", "editedAt"])
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.dateKey == resource.data.dateKey
+        && request.resource.data.runId == resource.data.runId
+        && request.resource.data.questionId == resource.data.questionId
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000;
+    }
+
     function hasValidEitherOrCounts(data) {
       return !("counts" in data)
         || data.counts.keys().hasOnly(["option_0", "option_1"]);
@@ -694,6 +786,24 @@ service cloud.firestore {
           isActiveMember()
           && resource.data.voterUserId == request.auth.uid
         );
+    }
+
+    match /activityEvents/{eventId} {
+      allow read: if isActiveMember();
+      allow create: if isActiveMember()
+        && hasValidActivityEventCreate(eventId, request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /dailyComments/{commentId} {
+      allow read: if isActiveMember();
+      allow create: if isActiveMember()
+        && hasValidDailyCommentCreate(request.resource.data);
+      allow update: if isActiveMember()
+        && resource.data.userId == request.auth.uid
+        && hasValidDailyCommentUpdate();
+      allow delete: if isAdmin()
+        || (isActiveMember() && resource.data.userId == request.auth.uid);
     }
 
     match /liveSessions/{sessionId} {
