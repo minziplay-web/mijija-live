@@ -25,7 +25,7 @@ npm run ui:capture
 ```
 
 Artefakte:
-- Screenshots landen in [docs/ui-review/after](C:\VSProjects\Gameapp\docs\ui-review\after)
+- Screenshots landen in `docs/ui-review/after`.
 
 ## Block A: Daily normal
 

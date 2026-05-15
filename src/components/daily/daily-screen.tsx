@@ -95,8 +95,10 @@ export function DailyScreen({
         (card) => card.phase === "unanswered" || card.phase === "error",
       );
       if (nextOpen !== -1) {
-        setCurrentIndex(nextOpen);
-        setShowCompletion(false);
+        queueMicrotask(() => {
+          setCurrentIndex(nextOpen);
+          setShowCompletion(false);
+        });
       }
     }
   }, [state, showCompletion]);

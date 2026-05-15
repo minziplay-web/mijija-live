@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Verifies preview routes in a real browser session, including hydration/runtime failures.
-// Usage: node scripts/preview-smoke.mjs
+// Usage: node scripts/review/preview-smoke.mjs
 
 import { chromium } from "playwright";
 import { previewRoutes } from "./preview-routes.mjs";

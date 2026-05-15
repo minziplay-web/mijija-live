@@ -101,11 +101,11 @@ npm run ui:capture
 
 Weitere Skripte:
 
-- `scripts/preview-routes.mjs`
-- `scripts/capture-ui.mjs`
-- `scripts/capture-daily-flow.mjs`
-- `scripts/backfill-default-profile-photos.mjs`
-- `scripts/check-firebase-env.mjs`
+- `scripts/review/preview-routes.mjs`
+- `scripts/review/capture-ui.mjs`
+- `scripts/review/capture-daily-flow.mjs`
+- `scripts/firebase/backfill-default-profile-photos.mjs`
+- `scripts/firebase/check-env.mjs`
 
 Die Capture-Skripte schreiben Screenshots nach `docs/ui-review/`.
 

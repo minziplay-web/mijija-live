@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "preview:smoke": "node scripts/preview-smoke.mjs",
-    "ui:capture": "node scripts/capture-ui.mjs --out docs/ui-review/after",
+    "preview:smoke": "node scripts/review/preview-smoke.mjs",
+    "ui:capture": "node scripts/review/capture-ui.mjs --out docs/ui-review/after",
     "firebase:login": "firebase login",
     "firebase:use": "firebase use --add",
     "firebase:deploy": "firebase deploy --only firestore:rules,firestore:indexes",
@@ -17,7 +17,7 @@
     "firebase:deploy:storage": "firebase deploy --only storage",
     "firebase:deploy:storage:live": "firebase deploy --project live --only storage",
     "firebase:deploy:storage:test": "firebase deploy --project test --only storage",
-    "firebase:check-env": "node scripts/check-firebase-env.mjs"
+    "firebase:check-env": "node scripts/firebase/check-env.mjs"
   },
   "dependencies": {
     "firebase": "^12.4.0",

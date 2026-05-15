@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import {
-  ADMIN_ACCENT,
   CategoryChip,
   DAILY_ACCENT,
   DangerButton,

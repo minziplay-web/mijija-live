@@ -32,7 +32,7 @@ export function AdminSpyProvider({ children }: { children: ReactNode }) {
   const [spyEnabled, setSpyEnabledState] = useState(false);
 
   useEffect(() => {
-    setSpyEnabledState(readInitialSpyFlag());
+    queueMicrotask(() => setSpyEnabledState(readInitialSpyFlag()));
 
     const onStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return;

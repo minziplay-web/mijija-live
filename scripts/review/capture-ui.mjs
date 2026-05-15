@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Captures UI screenshots of preview routes via Playwright.
-// Usage: node scripts/capture-ui.mjs [--out docs/ui-review/before]
+// Usage: node scripts/review/capture-ui.mjs [--out docs/ui-review/before]
 
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";

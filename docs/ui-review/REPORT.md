@@ -80,7 +80,7 @@ in iPhone-14-Pro-Viewport (390 × 844 @2x).
 |---|---|
 | [src/app/preview/layout.tsx](../../src/app/preview/layout.tsx), [src/app/preview/page.tsx](../../src/app/preview/page.tsx), [src/app/preview/[screen]/[variant]/page.tsx](../../src/app/preview/%5Bscreen%5D/%5Bvariant%5D/page.tsx) | **Neu** — dev-only Preview-Routing fuer Screenshots ohne Firebase-Setup. |
 | [src/lib/mocks/variants.ts](../../src/lib/mocks/variants.ts) | **Neu** — strukturierte Mock-Varianten fuer normal, loading, error, no-run, unplayable, incomplete, finished, partial, empty, warnings, errors etc. |
-| [scripts/capture-ui.mjs](../../scripts/capture-ui.mjs) | **Neu** — Playwright-Runner, 42 Screens × iPhone-14-Viewport, fullPage. |
+| [scripts/review/capture-ui.mjs](../../scripts/review/capture-ui.mjs) | **Neu** — Playwright-Runner, 42 Screens × iPhone-14-Viewport, fullPage. |
 
 ---
 
