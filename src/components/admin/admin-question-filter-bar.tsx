@@ -37,15 +37,12 @@ export function AdminQuestionFilterBar({
   const categoryOptions = Object.entries(CATEGORY_LABELS) as Array<[Category, string]>;
 
   return (
-    <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-card-flat">
-      <input
-        type="search"
-        placeholder="Frage suchen..."
+    <div className="space-y-2.5 rounded-2xl bg-[#1A1A1A] p-3 ring-1 ring-[#1F1F1F]">
+      <SearchInput
         value={filter.search}
-        onChange={(e) => onChange({ ...filter, search: e.target.value })}
-        className="min-h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-sand-900 outline-none placeholder:text-sand-400 transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-200"
+        onChange={(search) => onChange({ ...filter, search })}
       />
-      <div className="grid grid-cols-1 gap-2 text-sm min-[430px]:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 min-[430px]:grid-cols-3">
         <SelectField
           label="Kategorie"
           value={filter.category}
@@ -72,6 +69,32 @@ export function AdminQuestionFilterBar({
   );
 }
 
+function SearchInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  return (
+    <div className="relative">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#6E6E73]"
+      >
+        ⌕
+      </span>
+      <input
+        type="search"
+        placeholder="Frage suchen..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="min-h-10 w-full rounded-xl bg-[#0E0E0E] pl-9 pr-3 text-sm text-[#FAFAFA] outline-none ring-1 ring-[#1F1F1F] transition placeholder:text-[#6E6E73] focus:ring-[#4A5699]"
+      />
+    </div>
+  );
+}
+
 function SelectField<T extends string>({
   label,
   value,
@@ -84,17 +107,31 @@ function SelectField<T extends string>({
   onChange: (next: T) => void;
 }) {
   return (
-    <label className="space-y-1 text-xs">
-      <span className="block font-bold uppercase tracking-[0.14em] text-sand-500">
+    <label className="block space-y-1">
+      <span
+        className="block text-[9px] font-semibold uppercase tracking-[0.18em]"
+        style={{ color: "#6E6E73", fontFamily: "var(--font-mono)" }}
+      >
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        className="min-h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-sand-900 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-200"
+        className="min-h-10 w-full appearance-none rounded-xl bg-[#0E0E0E] px-3 text-sm font-semibold text-[#FAFAFA] outline-none ring-1 ring-[#1F1F1F] transition focus:ring-[#4A5699]"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236E6E73' d='M5 6 0 0h10z'/%3E%3C/svg%3E\")",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right 0.875rem center",
+          paddingRight: "2rem",
+        }}
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option
+            key={opt.value}
+            value={opt.value}
+            style={{ backgroundColor: "#1A1A1A", color: "#FAFAFA" }}
+          >
             {opt.label}
           </option>
         ))}
