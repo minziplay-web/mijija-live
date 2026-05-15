@@ -2,52 +2,93 @@
 
 import Link from "next/link";
 
-import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { useAdminSpy } from "@/lib/admin/admin-spy-context";
 import { berlinDateKey } from "@/lib/mapping/date";
+
+const ADMIN_ACCENT = "#4A5699";
 
 export function AdminSpyToggle() {
   const { spyEnabled, setSpyEnabled } = useAdminSpy();
   const today = berlinDateKey();
 
   return (
-    <section className="space-y-3 radius-card border border-sand-200/80 bg-white p-4 shadow-card-flat">
+    <section className="space-y-3 rounded-2xl bg-[#1A1A1A] p-4 ring-1 ring-[#1F1F1F]">
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-0.5">
-          <p className="text-sm font-bold text-sand-800">Admin-Einblick</p>
-          <p className="text-[11px] text-sand-500">
+        <div className="min-w-0 space-y-0.5">
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.22em]"
+            style={{ color: ADMIN_ACCENT, fontFamily: "var(--font-mono)" }}
+          >
+            Admin-Einblick
+          </p>
+          <p className="text-[13px] leading-relaxed text-[#A8A8A8]">
             Zeigt Daily-Antworten ohne dass du selbst antworten musst.
           </p>
         </div>
-        <ToggleSwitch
-          label="Admin-Einblick"
-          checked={spyEnabled}
-          onChange={setSpyEnabled}
-        />
+        <SpySwitch checked={spyEnabled} onChange={setSpyEnabled} />
       </div>
 
       {spyEnabled ? (
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={`/past-dailies/${today}`}
-            className="inline-flex items-center rounded-xl bg-brand-primary px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white"
-          >
-            Heutige Daily ansehen
-          </Link>
-          <Link
-            href="/past-dailies"
-            className="inline-flex items-center rounded-xl bg-sand-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sand-800"
-          >
-            Archiv öffnen
-          </Link>
-          <Link
-            href="/resolved"
-            className="inline-flex items-center rounded-xl bg-sand-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-sand-800"
-          >
-            Heute aufgelöst
-          </Link>
+        <div className="flex flex-wrap gap-2 border-t border-[#1F1F1F] pt-3">
+          <SpyLink href={`/past-dailies/${today}`} primary>
+            Heutige Daily
+          </SpyLink>
+          <SpyLink href="/past-dailies">Archiv</SpyLink>
+          <SpyLink href="/resolved">Heute aufgelöst</SpyLink>
         </div>
       ) : null}
     </section>
+  );
+}
+
+function SpySwitch({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label="Admin-Einblick aktivieren"
+      onClick={() => onChange(!checked)}
+      className="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition"
+      style={{
+        backgroundColor: checked ? ADMIN_ACCENT : "#2C2C2E",
+      }}
+    >
+      <span
+        className="absolute top-0.5 size-6 rounded-full bg-[#FAFAFA] shadow-sm transition"
+        style={{ left: checked ? "1.375rem" : "0.125rem" }}
+      />
+    </button>
+  );
+}
+
+function SpyLink({
+  href,
+  children,
+  primary = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  primary?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center rounded-xl px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition"
+      style={{
+        backgroundColor: primary ? ADMIN_ACCENT : "#0E0E0E",
+        color: "#FAFAFA",
+        fontFamily: "var(--font-mono)",
+        boxShadow: primary ? undefined : "inset 0 0 0 1px #1F1F1F",
+      }}
+    >
+      {children}
+    </Link>
   );
 }

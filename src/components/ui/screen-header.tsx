@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type HeaderTheme = "default" | "daily" | "recap" | "profile" | "archive";
+type HeaderTheme = "default" | "daily" | "recap" | "profile" | "archive" | "admin";
 
 // Akzent-Farbe pro Theme. Dark-Insta-Look: kein Gradient-Shell mehr, nur
 // kleine Eyebrow in Tab-Akzent + weißer Title auf Page-BG.
@@ -10,6 +10,7 @@ const themeAccent: Record<HeaderTheme, string> = {
   recap: "#F39A2B",
   profile: "#D860B5",
   archive: "#E5594F",
+  admin: "#4A5699",
 };
 
 export function ScreenHeader({

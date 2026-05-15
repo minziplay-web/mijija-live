@@ -12,7 +12,6 @@ import {
   deleteDailyRunComplete,
   deactivateUser,
   grantBonusTrophy,
-  importQuestions,
   removeDailyRunQuestion,
   resetUserProfilePhoto,
   resetDailyRunAnswers,
@@ -44,13 +43,6 @@ export default function AdminPage() {
       onUpdateQuestion={updateQuestion}
       onBulkSetActive={bulkSetQuestionsActive}
       onBulkDelete={bulkDeleteQuestions}
-      onImportQuestions={async (raw) => {
-        if (authState.status !== "authenticated") {
-          throw new Error("Nicht eingeloggt.");
-        }
-
-        return importQuestions(raw, authState.user.userId);
-      }}
       onCreateRun={async (mode, categoryPlan) => {
         if (authState.status !== "authenticated" || state.status !== "ready") {
           throw new Error("Nicht bereit.");

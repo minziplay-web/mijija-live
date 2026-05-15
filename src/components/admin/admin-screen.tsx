@@ -6,7 +6,6 @@ import { AdminConfigForm } from "@/components/admin/admin-config-form";
 import { AdminDailyCategoryPanel } from "@/components/admin/admin-daily-category-panel";
 import { AdminDailyList } from "@/components/admin/admin-daily-list";
 import { AdminDiagnostics } from "@/components/admin/admin-diagnostics";
-import { AdminJsonImport } from "@/components/admin/admin-json-import";
 import { AdminMemberList } from "@/components/admin/admin-member-list";
 import { AdminQuestionFilterBar } from "@/components/admin/admin-question-filter-bar";
 import { AdminQuestionList } from "@/components/admin/admin-question-list";
@@ -27,7 +26,6 @@ import type {
   AdminDailyQuestionRerollResult,
   AdminQuestionFilter,
   AdminQuestionEditInput,
-  AdminQuestionImportResult,
   AdminMemberRow,
   AdminQuestionRow,
   AdminRunActionResult,
@@ -43,7 +41,6 @@ export function AdminScreen({
   onUpdateQuestion,
   onBulkSetActive,
   onBulkDelete,
-  onImportQuestions,
   onCreateRun,
   onDeleteRun,
   onDeleteRunComplete,
@@ -66,7 +63,6 @@ export function AdminScreen({
   ) => Promise<void>;
   onBulkSetActive?: (questionIds: string[], active: boolean) => Promise<void>;
   onBulkDelete?: (questionIds: string[]) => Promise<void>;
-  onImportQuestions?: (raw: string) => Promise<AdminQuestionImportResult>;
   onCreateRun?: (
     mode: "create" | "replace",
     plan: AdminDailyCategoryPlan,
@@ -142,7 +138,7 @@ export function AdminScreen({
   if (state.status === "loading") {
     return (
       <div className="space-y-4">
-        <ScreenHeader eyebrow="Admin" title="Verwaltung" />
+        <ScreenHeader eyebrow="Admin" title="Verwaltung" theme="admin" />
         <SkeletonCard />
         <SkeletonCard />
       </div>
@@ -152,7 +148,7 @@ export function AdminScreen({
   if (state.status === "error") {
     return (
       <div className="space-y-4">
-        <ScreenHeader eyebrow="Admin" title="Verwaltung" />
+        <ScreenHeader eyebrow="Admin" title="Verwaltung" theme="admin" />
         <ErrorBanner message={state.message} />
       </div>
     );
@@ -161,7 +157,7 @@ export function AdminScreen({
   if (state.status === "forbidden") {
     return (
       <div className="space-y-4">
-        <ScreenHeader eyebrow="Admin" title="Verwaltung" />
+        <ScreenHeader eyebrow="Admin" title="Verwaltung" theme="admin" />
         <EmptyState
           icon="🔒"
           title="Nur für Admins"
@@ -196,69 +192,6 @@ export function AdminScreen({
         : prev,
     );
 
-  const importQuestions = async (raw: string) => {
-    try {
-      if (onImportQuestions) {
-        setState((prev) =>
-          prev.status === "ready"
-            ? {
-                ...prev,
-                questions: {
-                  ...prev.questions,
-                  importStatus: "importing",
-                  importError: undefined,
-                  importMessage: undefined,
-                },
-              }
-            : prev,
-        );
-        const result = await onImportQuestions(raw);
-        setState((prev) =>
-          prev.status === "ready"
-            ? {
-                ...prev,
-                questions: {
-                  ...prev.questions,
-                  importStatus: "success",
-                  importError: undefined,
-                  importMessage: buildImportMessage(result),
-                },
-              }
-            : prev,
-        );
-        return;
-      } else {
-        JSON.parse(raw);
-      }
-      setState((prev) =>
-        prev.status === "ready"
-          ? {
-              ...prev,
-              questions: {
-                ...prev.questions,
-                importStatus: "success",
-                importError: undefined,
-                importMessage: "Import erfolgreich.",
-              },
-            }
-          : prev,
-      );
-    } catch (error) {
-      setState((prev) =>
-        prev.status === "ready"
-          ? {
-              ...prev,
-              questions: {
-                ...prev.questions,
-                importStatus: "error",
-                importError: getErrorMessage(error, "Import konnte nicht verarbeitet werden."),
-                importMessage: undefined,
-              },
-            }
-          : prev,
-      );
-    }
-  };
 
   const runCreate = async (mode: "create" | "replace") => {
     setRunActionState((prev) => ({
@@ -599,6 +532,7 @@ export function AdminScreen({
         eyebrow="Admin"
         title="Verwaltung"
         subtitle="Fragen, Dailys und App-Konfiguration."
+        theme="admin"
       />
       <AdminDiagnostics daily={state.diagnostics.todayDaily} />
       <AdminSpyToggle />
@@ -610,14 +544,6 @@ export function AdminScreen({
             filter={state.questions.filter}
             onChange={updateQuestionFilter}
           />
-          <div className="hidden sm:block">
-            <AdminJsonImport
-              status={state.questions.importStatus}
-              error={state.questions.importError}
-              message={state.questions.importMessage}
-              onImport={importQuestions}
-            />
-          </div>
           <AdminQuestionList
             rows={filteredRows}
             onCreateQuestion={onCreateQuestion}
@@ -842,21 +768,6 @@ export function AdminScreen({
       />
     </div>
   );
-}
-
-function buildImportMessage(result: AdminQuestionImportResult) {
-  const parts: string[] = [];
-  if (result.importedCount > 0) {
-    parts.push(`${result.importedCount} importiert`);
-  }
-  if (result.updatedCount > 0) {
-    parts.push(`${result.updatedCount} aktualisiert`);
-  }
-  if (result.skippedCount > 0) {
-    parts.push(`${result.skippedCount} übersprungen`);
-  }
-
-  return parts.length > 0 ? `${parts.join(", ")}.` : "Nichts geändert.";
 }
 
 function buildRunActionMessage(result: AdminRunActionResult) {
